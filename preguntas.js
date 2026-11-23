@@ -1,7 +1,6 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbzwqN7R5rbXQB2Q_PsyHQRIAfgH1K0FKCNaQO9eVrCdL_ubTYuO6_qaSAVtRAhn-bng3w/exec";
 
 const PREGUNTAS = [
- const PREGUNTAS = [
   { id: 1, nivel: "Básico", tiempo: 5, bloom: "Recordar", texto: "Según Laudon & Laudon, un SI integra personas, procesos, datos y tecnología. ¿Qué plataforma del MEF integra presupuesto, tesorería, contabilidad y endeudamiento?", opciones: ["SIGA", "SIAF", "SEACE", "PLAME", "INVIERTE.PE"], correctas: [1] },
   { id: 2, nivel: "Básico", tiempo: 5, bloom: "Recordar", texto: "¿Qué organismo administra actualmente el SEACE y la plataforma PLADICOP bajo la Ley 32069?", opciones: ["MEF", "SUNAT", "OECE", "PCM", "SBN"], correctas: [2] },
   { id: 3, nivel: "Básico", tiempo: 5, bloom: "Recordar", texto: "¿Qué norma establece el marco legal de la Ley de Gobierno Digital en el Perú?", opciones: ["DL 1439", "Ley 32069", "DL 1412", "DL 1252", "Ley 32513"], correctas: [2] },
@@ -21,7 +20,5 @@ const PREGUNTAS = [
   { id: 17, nivel: "Avanzado", tiempo: 15, bloom: "Analizar", texto: "Caso SISFOH (86 000 hogares mal clasificados): ¿qué impacto directo genera en la gestión pública? (Selecciona 2)", opciones: ["Pérdida de precisión en focalización social", "Asignación ineficiente de recursos y políticas desalineadas", "Aumento automático del PIA", "Mayor velocidad de girado", "Fin de la interoperabilidad"], correctas: [0, 1] },
   { id: 18, nivel: "Avanzado", tiempo: 15, bloom: "Analizar", texto: "Caso Municipalidad de Áncash (padrones en Excel y demoras): ¿qué arquitectura resuelve las causas raíz? (Selecciona 3)", opciones: ["Depurar base y validar DNI con interoperabilidad", "Automatizar alertas y seguimiento de reclamos", "Gobernanza de datos con indicadores de duplicidad", "Comprar PCs rápidas manteniendo Excel", "Restringir reclamos ciudadanos"], correctas: [0, 1, 2] },
   { id: 19, nivel: "Avanzado", tiempo: 15, bloom: "Analizar", texto: "¿Qué secuencia lógica entre POI, PIA y PAC garantiza el alineamiento y legalidad del gasto?", opciones: ["PAC define metas → PIA elige proveedores → POI paga", "POI define qué se hará → PIA asegura recursos → PAC organiza contrataciones", "PIA define necesidades → PAC aprueba presupuesto → POI ejecuta", "PAC reemplaza al POI", "Operan independientemente"], correctas: [1] },
-  { id: 20, nivel: "Avanzado", tiempo: 15, bloom: "Analizar", texto: "Ante filtraciones (RENIEC 2025, PNP, Telegram 2026), ¿qué equilibrio exige un SI público moderno? (Selecciona 2)", opciones: ["Interoperabilidad con controles de acceso y trazabilidad", "Finalidad legítima
-
-
-
+  { id: 20, nivel: "Avanzado", tiempo: 15, bloom: "Analizar", texto: "Ante filtraciones (RENIEC 2025, PNP, Telegram 2026), ¿qué equilibrio exige un SI público moderno? (Selecciona 2)", opciones: ["Interoperabilidad con controles de acceso y trazabilidad", "Finalidad legítima y seguridad supervisada por la ANPD", "Bloquear todo intercambio de datos", "Ignorar protección de datos por eficiencia", "Publicar padrones completos en web"], correctas: [0, 1] }
+];
