@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -33,7 +33,7 @@
   <div class="card">
     <div class="status-bar">
       <strong>Gestión Pública – Evaluación</strong>
-      <span id="statusBadge" class="badge offline"><span class="dot"></span><span id="statusText">Desconectado</span></span>
+      <span id="statusBadge" class="badge offline"><span class="dot"></span><span id="statusText">Verificando...</span></span>
     </div>
 
     <!-- PANTALLA INICIO -->
@@ -49,7 +49,7 @@
       <input type="text" id="dni" placeholder="Ej. 20191234 o 45678912" />
       <label>Nombres y Apellidos completos</label>
       <input type="text" id="nombre" placeholder="Ej. Juan Carlos Pérez López" />
-      <button id="btnIniciar" onclick="iniciarQuiz()" disabled>Esperando activación del docente...</button>
+      <button id="btnIniciar" onclick="iniciarQuiz()" disabled>Conectando con el docente...</button>
       <p id="loginMsg" style="color:#dc2626; font-weight:600;"></p>
     </div>
 
@@ -66,7 +66,7 @@
       <button id="btnSiguiente" onclick="avanzarPregunta()" class="btn-next hidden" style="margin-top:14px;">Siguiente pregunta →</button>
     </div>
 
-    <!-- PANTALLA FINAL (SOLO NOTA EN DECIMALES 0.00 Y FORMATO 20/20) -->
+    <!-- PANTALLA FINAL -->
     <div id="viewEnd" class="hidden">
       <h2 style="text-align:center; margin-bottom:6px;">¡Evaluación Finalizada!</h2>
       <p id="endStudentMsg" style="text-align:center; color:#475569; margin-top:0;"></p>
@@ -78,20 +78,17 @@
     </div>
   </div>
 
-  <script src="preguntas.js"></script>
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzwqN7R5rbXQB2Q_PsyHQRIAfgH1K0FKCNaQO9eVrCdL_ubTYuO6_qaSAVtRAhn-bng3w/exec";
-    let quizActivo = false, intentoActual = 1, idx = 0, aciertos = 0, tiempoTotal = 0;
-    let seleccion = new Set(), timerInt = null, tiempoRestante = 0, respondida = false;
 
-    async function checkStatus() {
-      try {
-        const res = await fetch(`${SCRIPT_URL}?action=status&t=${Date.now()}`);
-        const data = await res.json();
-        quizActivo = Boolean(data.activo);
-        const badge = document.getElementById('statusBadge');
-        const txt = document.getElementById('statusText');
-        const btn = document.getElementById('btnIniciar');
-
-        if (quizActivo) {
-          badge.className = 'badge
+    const PREGUNTAS = [
+      { id: 1, nivel: "Básico", tiempo: 5, bloom: "Recordar", texto: "Según Laudon & Laudon, un SI integra personas, procesos, datos y tecnología. ¿Qué plataforma del MEF integra presupuesto, tesorería, contabilidad y endeudamiento?", opciones: ["SIGA", "SIAF", "SEACE", "PLAME", "INVIERTE.PE"], correctas: [1] },
+      { id: 2, nivel: "Básico", tiempo: 5, bloom: "Recordar", texto: "¿Qué organismo administra actualmente el SEACE y la plataforma PLADICOP bajo la Ley 32069?", opciones: ["MEF", "SUNAT", "OECE", "PCM", "SBN"], correctas: [2] },
+      { id: 3, nivel: "Básico", tiempo: 5, bloom: "Recordar", texto: "¿Qué norma establece el marco legal de la Ley de Gobierno Digital en el Perú?", opciones: ["DL 1439", "Ley 32069", "DL 1412", "DL 1252", "Ley 32513"], correctas: [2] },
+      { id: 4, nivel: "Básico", tiempo: 5, bloom: "Recordar", texto: "¿Cuáles de los siguientes módulos pertenecen al SIGA? (Selecciona 3)", opciones: ["Logística", "Almacén", "Patrimonio", "Endeudamiento Público", "PLAME"], correctas: [0, 1, 2] },
+      { id: 5, nivel: "Básico", tiempo: 5, bloom: "Comprender", texto: "En la Consulta Amigable del MEF, ¿cómo se calcula el avance de ejecución presupuestal?", opciones: ["Certificado ÷ PIA", "Compromiso ÷ PIM", "Devengado ÷ PIM", "Girado ÷ PIA", "Pagado ÷ Certificado"], correctas: [2] },
+      { id: 6, nivel: "Básico", tiempo: 5, bloom: "Recordar", texto: "¿Qué entidades administran T-Registro/PLAME e INVIERTE.PE respectivamente? (Selecciona 2)", opciones: ["SUNAT (T-Registro/PLAME)", "MEF - DGPMI (INVIERTE.PE)", "OECE (INVIERTE.PE)", "PCM (PLAME)", "Contraloría (T-Registro)"], correctas: [0, 1] },
+      { id: 7, nivel: "Intermedio", tiempo: 10, bloom: "Comprender", texto: "Caso Bono Familiar Universal (S/ 579 180 de perjuicio): ¿qué fallas de datos detectó la Contraloría? (Selecciona 2)", opciones: ["Carga parcialmente manual del padrón", "Falta de configuración y validación del software", "Exceso de interoperabilidad PIDE", "Uso del catálogo SIGA", "Cierre del año fiscal"], correctas: [0, 1] },
+      { id: 8, nivel: "Intermedio", tiempo: 10, bloom: "Comprender", texto: "¿Cuáles son los módulos que conforman el SIAF Web? (Selecciona 3)", opciones: ["MPP (Presupuestario)", "MAD (Administrativo)", "MADAF (Autorizaciones)", "PAC (Plan Anual)", "SBN (Patrimonio)"], correctas: [0, 1, 2] },
+      { id: 9, nivel: "Intermedio", tiempo: 10, bloom: "Aplicar", texto: "Caso Universidad Pública: surge una compra urgente de software no prevista. ¿Qué debe hacerse antes de convocar? (Selecciona 2)", opciones: ["Modificar el PAC con sustento", "Registrar la modificación en SEACE/PLADICOP", "Emitir el devengado directo en SIAF", "Dar de baja en SIGA", "Omitir requerimiento"], correctas: [0, 1] },
+      { id: 10, nivel: "Intermedio", tiempo: 10, bloom: "Aplicar", texto: "En el SIAF, ¿qué requisitos son obligatorios para registrar el Devengado sin observaciones de control? (Selecciona
