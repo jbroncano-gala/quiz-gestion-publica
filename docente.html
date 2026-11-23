@@ -9,9 +9,12 @@
     .container { max-width: 1150px; margin: 0 auto; }
     .header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 20px; }
     .controls { display: flex; flex-wrap: wrap; gap: 10px; }
-    button { padding: 10px 16px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 14px; }
-    .btn-on { background: #22c55e; color: #052e16; } .btn-off { background: #ef4444; color: #fff; }
-    .btn-blue { background: #3b82f6; color: #fff; } .btn-amber { background: #f59e0b; color: #1e293b; }
+    button { padding: 10px 16px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 14px; transition: opacity 0.2s; }
+    button:disabled { opacity: 0.6; cursor: wait; }
+    .btn-on { background: #22c55e; color: #052e16; }
+    .btn-off { background: #ef4444; color: #fff; }
+    .btn-blue { background: #3b82f6; color: #fff; }
+    .btn-amber { background: #f59e0b; color: #1e293b; }
     .btn-emerald { background: #10b981; color: #fff; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 24px; }
     .kpi { background: #1e293b; padding: 18px; border-radius: 12px; text-align: center; border: 1px solid #334155; }
@@ -26,12 +29,12 @@
     <div class="header">
       <div>
         <h1 style="margin:0;">Panel Docente – CURSO GENERAL</h1>
-        <small style="color:#94a3b8;">Seguimiento en tiempo real • UNASAM Moodle SVA</small>
+        <small id="connStatus" style="color:#94a3b8;">Conectando con Google Sheets...</small>
       </div>
       <div class="controls">
-        <button id="btnToggleQuiz" class="btn-off" onclick="toggleQuiz()">Quiz Desactivado (Activar)</button>
+        <button id="btnToggleQuiz" class="btn-off" onclick="toggleQuiz()">○ Quiz INACTIVO (Activar)</button>
         <button id="btnRegla" class="btn-amber" onclick="toggleRegla()">Regla: Nota 2.° Intento</button>
-        <button class="btn-blue" onclick="cargarDatos()">↻ Actualizar Sheets</button>
+        <button id="btnRefresh" class="btn-blue" onclick="cargarDatos(true)">↻ Actualizar Sheets</button>
         <button class="btn-emerald" onclick="abrirSheets()">📊 Abrir Google Sheets</button>
         <button class="btn-blue" onclick="descargarExcel()">⬇ Descargar Excel (.csv)</button>
       </div>
@@ -56,74 +59,4 @@
 
   <script src="preguntas.js"></script>
   <script>
-    let estadoActivo = false, reglaActual = 'SEGUNDO', sheetUrl = '', datosCompletos = [];
-
-    async function cargarDatos() {
-      const res = await fetch(`${API_URL}?action=teacher`).then(r => r.json());
-      estadoActivo = res.activo;
-      reglaActual = res.regla;
-      sheetUrl = res.sheetUrl;
-      datosCompletos = res.todos || [];
-
-      const bQuiz = document.getElementById('btnToggleQuiz');
-      bQuiz.className = estadoActivo ? 'btn-on' : 'btn-off';
-      bQuiz.textContent = estadoActivo ? '● Quiz ACTIVO (Desactivar)' : '○ Quiz INACTIVO (Activar)';
-
-      document.getElementById('btnRegla').textContent =
-        reglaActual === 'MAXIMA' ? 'Regla: Nota Máxima' : 'Regla: Nota 2.° Intento';
-
-      document.getElementById('kTotal').textContent = res.stats.totalIngresados;
-      document.getElementById('kResp').textContent = res.stats.respondiendo;
-      document.getElementById('kInt2').textContent = res.stats.enSegundoIntento;
-      document.getElementById('kFin').textContent = res.stats.finalizados;
-      document.getElementById('kProm').textContent = res.promedioNotaMax;
-
-      const tb = document.getElementById('top15Body');
-      tb.innerHTML = '';
-      (res.top15 || []).forEach((s, i) => {
-        tb.innerHTML += `<tr><td>${i+1}</td><td>${s.dni}</td><td>${s.nombre}</td><td>${s.aciertos}/20</td><td>${s.tiempo}s</td><td><strong>${s.nota}</strong></td></tr>`;
-      });
-    }
-
-    async function toggleQuiz() {
-     await fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ action: 'setConfig', clave: 'activo', valor: !estadoActivo })
-  });
-  setTimeout(cargarDatos, 800);
-}
-
-    async function toggleRegla() {
-      const nueva = reglaActual === 'SEGUNDO' ? 'MAXIMA' : 'SEGUNDO';
-  await fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ action: 'setConfig', clave: 'regla', valor: nueva })
-  });
-  setTimeout(cargarDatos, 800);
-}
-
-    function abrirSheets() {
-      if (sheetUrl) window.open(sheetUrl, '_blank');
-      else alert('Aún no se ha cargado el enlace de Google Sheets.');
-    }
-
-    function descargarExcel() {
-      let csv = 'DNI_Codigo,Nombres_Apellidos,Intento1,Intento2,Aciertos,Tiempo_Seg,Nota_Final\n';
-      datosCompletos.forEach(r => {
-        csv += `"${r.dni}","${r.nombre}",${r.intento1},${r.intento2},${r.aciertos},${r.tiempo},${r.nota}\n`;
-      });
-      const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'Notas_Quiz_UNASAM.csv';
-      a.click();
-    }
-
-    setInterval(cargarDatos, 4000);
-    cargarDatos();
-  </script>
-</body>
-</html>
-
+    let estadoActivo = false, reglaActual = 'SEGUNDO', sheetUrl = '', datosCompletos
