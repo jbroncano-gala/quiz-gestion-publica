@@ -57,6 +57,110 @@
     </table>
   </div>
 
-  <script src="preguntas.js"></script>
   <script>
-    let estadoActivo = false, reglaActual = 'SEGUNDO', sheetUrl = '', datosCompletos
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzwqN7R5rbXQB2Q_PsyHQRIAfgH1K0FKCNaQO9eVrCdL_ubTYuO6_qaSAVtRAhn-bng3w/exec";
+    let estadoActivo = false, reglaActual = 'SEGUNDO', sheetUrl = '', datosCompletos = [];
+
+    function pintarUI(res) {
+      estadoActivo = Boolean(res.activo);
+      reglaActual = String(res.regla || 'SEGUNDO').toUpperCase();
+      sheetUrl = res.sheetUrl || '';
+      datosCompletos = res.todos || [];
+
+      const statusEl = document.getElementById('connStatus');
+      statusEl.textContent = '✓ Vinculado en tiempo real • Evaluación del Curso';
+      statusEl.style.color = '#4ade80';
+
+      const bQuiz = document.getElementById('btnToggleQuiz');
+      bQuiz.disabled = false;
+      bQuiz.className = estadoActivo ? 'btn-on' : 'btn-off';
+      bQuiz.textContent = estadoActivo ? '● Quiz ACTIVO (Desactivar)' : '○ Quiz INACTIVO (Activar)';
+
+      const bRegla = document.getElementById('btnRegla');
+      bRegla.disabled = false;
+      bRegla.textContent = reglaActual === 'MAXIMA' ? 'Regla: Nota Máxima' : 'Regla: Nota 2.° Intento';
+
+      document.getElementById('kTotal').textContent = res.stats.totalIngresados;
+      document.getElementById('kResp').textContent = res.stats.respondiendo;
+      document.getElementById('kInt2').textContent = res.stats.enSegundoIntento;
+      document.getElementById('kFin').textContent = res.stats.finalizados;
+      document.getElementById('kProm').textContent = res.promedioNotaMax;
+
+      const tb = document.getElementById('top15Body');
+      tb.innerHTML = '';
+      (res.top15 || []).forEach((s, i) => {
+        tb.innerHTML += `<tr><td>${i+1}</td><td>${s.dni}</td><td>${s.nombre}</td><td>${s.aciertos}/20</td><td>${s.tiempo}s</td><td><strong>${s.nota}</strong></td></tr>`;
+      });
+    }
+
+    async function cargarDatos(manual = false) {
+      const btnRef = document.getElementById('btnRefresh');
+      if (manual) {
+        btnRef.disabled = true;
+        btnRef.textContent = '↻ Sincronizando...';
+      }
+      try {
+        const res = await fetch(`${SCRIPT_URL}?action=teacher&t=${Date.now()}`).then(r => r.json());
+        pintarUI(res);
+      } catch (e) {
+        const statusEl = document.getElementById('connStatus');
+        statusEl.textContent = '⚠ Error de red: ' + e.message;
+        statusEl.style.color = '#f87171';
+      } finally {
+        if (manual) {
+          btnRef.disabled = false;
+          btnRef.textContent = '↻ Actualizar Sheets';
+        }
+      }
+    }
+
+    async function toggleQuiz() {
+      const bQuiz = document.getElementById('btnToggleQuiz');
+      bQuiz.disabled = true;
+      bQuiz.textContent = 'Actualizando estado...';
+      try {
+        const nuevoEstado = !estadoActivo;
+        const res = await fetch(`${SCRIPT_URL}?action=setConfig&clave=activo&valor=${nuevoEstado}&t=${Date.now()}`).then(r => r.json());
+        pintarUI(res);
+      } catch (e) {
+        bQuiz.disabled = false;
+        alert('Error al conectar con Google Sheets: ' + e.message);
+      }
+    }
+
+    async function toggleRegla() {
+      const bRegla = document.getElementById('btnRegla');
+      bRegla.disabled = true;
+      bRegla.textContent = 'Cambiando regla...';
+      try {
+        const nueva = reglaActual === 'SEGUNDO' ? 'MAXIMA' : 'SEGUNDO';
+        const res = await fetch(`${SCRIPT_URL}?action=setConfig&clave=regla&valor=${nueva}&t=${Date.now()}`).then(r => r.json());
+        pintarUI(res);
+      } catch (e) {
+        bRegla.disabled = false;
+        alert('No se pudo cambiar la regla: ' + e.message);
+      }
+    }
+
+    function abrirSheets() {
+      if (sheetUrl) window.open(sheetUrl, '_blank');
+      else alert('Aún no se ha cargado el enlace de Google Sheets.');
+    }
+
+    function descargarExcel() {
+      let csv = 'DNI_Codigo,Nombres_Apellidos,Intento1,Intento2,Aciertos,Tiempo_Seg,Nota_Final\n';
+      datosCompletos.forEach(r => {
+        csv += `"${r.dni}","${r.nombre}",${r.intento1},${r.intento2},${r.aciertos},${r.tiempo},${r.nota}\n`;
+      });
+      const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'Notas_Quiz_Curso.csv';
+      a.click();
+    }
+
+    setInterval(() => cargarDatos(false), 4000);
+    cargarDatos(false);
+  </script>
+</body>
+</html>
