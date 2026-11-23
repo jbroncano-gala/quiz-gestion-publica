@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbzyAVGAmcsLreHVm2aIfwwUhcAIul9299vyqpPiVCCPNhxeOa6KiJLWdnTntrpqguLA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxsDQkIFNPFhj8c2nN4RWm6Qboc5wzJggftrClwCliLufzlyB83jnNs94WaeAmpN-_8yw/exec";
 
 const PREGUNTAS = [
   { id: 1, nivel: "Básico", tiempo: 5, bloom: "Recordar", texto: "Según Laudon & Laudon, un SI integra personas, procesos, datos y tecnología. ¿Qué plataforma del MEF integra presupuesto, tesorería, contabilidad y endeudamiento?", opciones: ["SIGA", "SIAF", "SEACE", "PLAME", "INVIERTE.PE"], correctas: [1] },
@@ -22,3 +22,4 @@ const PREGUNTAS = [
   { id: 19, nivel: "Avanzado", tiempo: 15, bloom: "Analizar", texto: "¿Qué secuencia lógica entre POI, PIA y PAC garantiza el alineamiento y legalidad del gasto?", opciones: ["PAC define metas → PIA elige proveedores → POI paga", "POI define qué se hará → PIA asegura recursos → PAC organiza contrataciones", "PIA define necesidades → PAC aprueba presupuesto → POI ejecuta", "PAC reemplaza al POI", "Operan independientemente"], correctas: [1] },
   { id: 20, nivel: "Avanzado", tiempo: 15, bloom: "Analizar", texto: "Ante filtraciones (RENIEC 2025, PNP, Telegram 2026), ¿qué equilibrio exige un SI público moderno? (Selecciona 2)", opciones: ["Interoperabilidad con controles de acceso y trazabilidad", "Finalidad legítima y seguridad supervisada por la ANPD", "Bloquear todo intercambio de datos", "Ignorar protección de datos por eficiencia", "Publicar padrones completos en web"], correctas: [0, 1] }
 ];
+
