@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbzwqN7R5rbXQB2Q_PsyHQRIAfgH1K0FKCNaQO9eVrCdL_ubTYuO6_qaSAVtRAhn-bng3w/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbw7OltjPFqGpEva8qoWnCrtgNicGeTfZIBM2my9_3Snp02pOKtwZY2WdvAUs2UB6Mgx/exec";
 
 const PREGUNTAS = [
   { id: 1, nivel: "Básico", tiempo: 5, bloom: "Recordar", texto: "Según Laudon & Laudon, un SI integra personas, procesos, datos y tecnología. ¿Qué plataforma del MEF integra presupuesto, tesorería, contabilidad y endeudamiento?", opciones: ["SIGA", "SIAF", "SEACE", "PLAME", "INVIERTE.PE"], correctas: [1] },
