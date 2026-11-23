@@ -86,15 +86,23 @@
     }
 
     async function toggleQuiz() {
-      await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'setConfig', clave: 'activo', valor: !estadoActivo }) });
-      cargarDatos();
-    }
+     await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action: 'setConfig', clave: 'activo', valor: !estadoActivo })
+  });
+  setTimeout(cargarDatos, 800);
+}
 
     async function toggleRegla() {
       const nueva = reglaActual === 'SEGUNDO' ? 'MAXIMA' : 'SEGUNDO';
-      await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'setConfig', clave: 'regla', valor: nueva }) });
-      cargarDatos();
-    }
+  await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action: 'setConfig', clave: 'regla', valor: nueva })
+  });
+  setTimeout(cargarDatos, 800);
+}
 
     function abrirSheets() {
       if (sheetUrl) window.open(sheetUrl, '_blank');
@@ -118,3 +126,4 @@
   </script>
 </body>
 </html>
+
