@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz - Sistemas de Información para la Gestión Pública</title>
+  <style>
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f1f5f9; margin: 0; padding: 16px; color: #1e293b; }
+    .card { max-width: 680px; margin: 0 auto; background: #fff; border-radius: 14px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    .status-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; font-weight: 700; font-size: 14px; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .online { background: #dcfce7; color: #166534; } .online .dot { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+    .offline { background: #fee2e2; color: #991b1b; } .offline .dot { background: #ef4444; }
+    input { width: 100%; padding: 12px; margin: 8px 0 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+    button { width: 100%; padding: 14px; border: none; border-radius: 10px; background: #1d4ed8; color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; }
+    button:disabled { background: #94a3b8; cursor: not-allowed; }
+    .info-box { background: #eff6ff; border-left: 4px solid #2563eb; padding: 12px 16px; border-radius: 8px; font-size: 14px; margin-bottom: 16px; }
+    .opt { display: flex; align-items: center; gap: 10px; padding: 12px; margin: 8px 0; border: 2px solid #e2e8f0; border-radius: 10px; cursor: pointer; transition: 0.15s; }
+    .opt.selected { border-color: #2563eb; background: #eff6ff; }
+    .timer { font-size: 20px; font-weight: 800; color: #dc2626; }
+    .hidden { display: none; }
+    .metric-box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 12px; padding: 20px; text-align: center; margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="status-bar">
+      <strong>UNASAM – Gestión Pública</strong>
+      <span id="statusBadge" class="badge offline"><span class="dot"></span><span id="statusText">Desconectado</span></span>
+    </div>
+
+    <!-- PANTALLA INICIO -->
+    <div id="viewLogin">
+      <h2>Evaluación: Sistemas de Información</h2>
+      <div class="info-box">
+        <strong>Indicaciones:</strong><br>
+        • Ingresa tu <strong>Código de estudiante o DNI</strong> y tus <strong>Nombres y Apellidos completos</strong>.<br>
+        • Tienes un máximo de <strong>2 intentos</strong> (si rindes el 2.° intento, rige la regla definida por el docente).<br>
+        • Tiempos por pregunta: <strong>Fácil: 5 s</strong> | <strong>Media: 10 s</strong> | <strong>Difícil: 15 s</strong>.
+      </div>
+      <label>Código de estudiante o DNI</label>
+      <input type="text" id="dni" placeholder="Ej. 20191234 o 45678912" />
+      <label>Nombres y Apellidos completos</label>
+      <input type="text" id="nombre" placeholder="Ej. Juan Carlos Pérez López" />
+      <button id="btnIniciar" onclick="iniciarQuiz()" disabled>Esperando activación del docente...</button>
+      <p id="loginMsg" style="color:#dc2626; font-weight:600;"></p>
+    </div>
+
+    <!-- PANTALLA QUIZ -->
+    <div id="viewQuiz" class="hidden">
+      <div class="status-bar">
+        <span id="qMeta" style="font-weight:600; color:#475569;"></span>
+        <span class="timer">⏱ <span id="qTimer">0</span>s</span>
+      </div>
+      <h3 id="qText"></h3>
+      <div id="qOptions"></div>
+      <button onclick="siguientePregunta()" style="margin-top:14px;">Confirmar y Siguiente</button>
+    </div>
+
+    <!-- PANTALLA FINAL (SOLO PROMEDIO GENERAL DE NOTA MÁXIMA) -->
+    <div id="viewEnd" class="hidden">
+      <h2>¡Evaluación Finalizada!</h2>
+      <p id="endStudentMsg"></p>
+      <div class="metric-box">
+        <div style="font-size:14px; color:#64748b;">Promedio General de la Nota Máxima del Curso</div>
+        <div id="avgMaxDisplay" style="font-size:36px; font-weight:800; color:#1d4ed8;">--</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="preguntas.js"></script>
+  <script>
+    let quizActivo = false, intentoActual = 1, idx = 0, aciertos = 0, tiempoTotal = 0;
+    let seleccion = new Set(), timerInt = null, tiempoRestante = 0;
+
+    async function checkStatus() {
+      try {
+        const res = await fetch(`${API_URL}?action=status`);
+        const data = await res.json();
+        quizActivo = data.activo;
+        const badge = document.getElementById('statusBadge');
+        const txt = document.getElementById('statusText');
+        const btn = document.getElementById('btnIniciar');
+        if (quizActivo) {
+          badge.className = 'badge online'; txt.textContent = 'Conectado';
+          btn.disabled = false; btn.textContent = 'Iniciar Evaluación';
+        } else {
+          badge.className = 'badge offline'; txt.textContent = 'Desconectado';
+          btn.disabled = true; btn.textContent = 'Quiz desactivado por el docente';
+        }
+        if (!document.getElementById('viewEnd').classList.contains('hidden')) {
+          document.getElementById('avgMaxDisplay').textContent = data.promedioNotaMax;
+        }
+      } catch (e) {}
+    }
+    setInterval(checkStatus, 4000);
+    checkStatus();
+
+    async function iniciarQuiz() {
+      const dni = document.getElementById('dni').value.trim();
+      const nombre = document.getElementById('nombre').value.trim();
+      if (!dni || !nombre) { document.getElementById('loginMsg').textContent = 'Completa tu DNI/Código y Nombres.'; return; }
+
+      const resp = await fetch(API_URL, {
+        method: 'POST', body: JSON.stringify({ action: 'start', dni, nombre })
+      }).then(r => r.json());
+
+      if (!resp.ok) { document.getElementById('loginMsg').textContent = resp.msg; return; }
+      intentoActual = resp.intento;
+      idx = 0; aciertos = 0; tiempoTotal = 0;
+      document.getElementById('viewLogin').classList.add('hidden');
+      document.getElementById('viewQuiz').classList.remove('hidden');
+      mostrarPregunta();
+    }
+
+    function mostrarPregunta() {
+      const p = PREGUNTAS[idx];
+      seleccion.clear();
+      document.getElementById('qMeta').textContent = `Pregunta ${idx + 1}/${PREGUNTAS.length} • ${p.nivel} (${p.correctas.length} resp.)`;
+      document.getElementById('qText').textContent = p.texto;
+      const cont = document.getElementById('qOptions');
+      cont.innerHTML = '';
+      p.opciones.forEach((op, i) => {
+        const div = document.createElement('div');
+        div.className = 'opt';
+        div.textContent = `${String.fromCharCode(65 + i)}) ${op}`;
+        div.onclick = () => {
+          if (seleccion.has(i)) { seleccion.delete(i); div.classList.remove('selected'); }
+          else { seleccion.add(i); div.classList.add('selected'); }
+        };
+        cont.appendChild(div);
+      });
+
+      tiempoRestante = p.tiempo;
+      document.getElementById('qTimer').textContent = tiempoRestante;
+      clearInterval(timerInt);
+      timerInt = setInterval(() => {
+        tiempoRestante--;
+        document.getElementById('qTimer').textContent = tiempoRestante;
+        if (tiempoRestante <= 0) siguientePregunta();
+      }, 1000);
+    }
+
+    async function siguientePregunta() {
+      clearInterval(timerInt);
+      const p = PREGUNTAS[idx];
+      tiempoTotal += (p.tiempo - Math.max(0, tiempoRestante));
+      const selArr = Array.from(seleccion).sort().join(',');
+      const corArr = [...p.correctas].sort().join(',');
+      if (selArr === corArr) aciertos++;
+
+      idx++;
+      if (idx < PREGUNTAS.length) {
+        mostrarPregunta();
+      } else {
+        const nota = Number(((aciertos / PREGUNTAS.length) * 20).toFixed(2));
+        await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'finish',
+            dni: document.getElementById('dni').value.trim(),
+            intento: intentoActual, nota, aciertos, tiempo: tiempoTotal
+          })
+        });
+        document.getElementById('viewQuiz').classList.add('hidden');
+        document.getElementById('viewEnd').classList.remove('hidden');
+        document.getElementById('endStudentMsg').textContent = `Intento ${intentoActual} registrado correctamente.`;
+        checkStatus();
+      }
+    }
+  </script>
+</body>
+</html>
