@@ -23,3 +23,4 @@ const PREGUNTAS = [
   { id: 20, nivel: "Avanzado", tiempo: 15, bloom: "Analizar", texto: "Ante filtraciones (RENIEC 2025, PNP, Telegram 2026), ¿qué equilibrio exige un SI público moderno? (Selecciona 2)", opciones: ["Interoperabilidad con controles de acceso y trazabilidad", "Finalidad legítima y seguridad supervisada por la ANPD", "Bloquear todo intercambio de datos", "Ignorar protección de datos por eficiencia", "Publicar padrones completos en web"], correctas: [0, 1] }
 ];
 
+
