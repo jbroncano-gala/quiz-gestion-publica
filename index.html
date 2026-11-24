@@ -37,7 +37,7 @@
     </div>
 
     <div id="viewLogin">
-      <h2>Evaluación: Sistemas de Información</h2>
+      <h2>Evaluación: Sistemas de Información GP</h2>
       <div class="info-box">
         <strong>Indicaciones:</strong><br>
         • Ingresa tu <strong>Código de estudiante o DNI</strong> y tus <strong>Nombres y Apellidos completos</strong>.<br>
@@ -102,7 +102,7 @@
     ];
 
     let quizActivo = false, intentoActual = 1, maxIntentos = 2;
-    let tiemposDocente = { basico: 5, intermedio: 10, avanzado: 15 };
+    let tiemposDocente = { basico: 10, intermedio: 15, avanzado: 20 };
     let idx = 0, aciertos = 0, tiempoTotal = 0, tiempoPreguntaActual = 10;
     let seleccion = new Set(), timerInt = null, tiempoRestante = 0, respondida = false;
 
@@ -206,9 +206,9 @@
       seleccion.clear();
       respondida = false;
 
-      if (p.nivel === 'Básico') tiempoPreguntaActual = Number(tiemposDocente.basico) || 5;
-      else if (p.nivel === 'Intermedio') tiempoPreguntaActual = Number(tiemposDocente.intermedio) || 10;
-      else tiempoPreguntaActual = Number(tiemposDocente.avanzado) || 15;
+      if (p.nivel === 'Básico') tiempoPreguntaActual = Number(tiemposDocente.basico) || 10;
+      else if (p.nivel === 'Intermedio') tiempoPreguntaActual = Number(tiemposDocente.intermedio) || 15;
+      else tiempoPreguntaActual = Number(tiemposDocente.avanzado) || 20;
 
       document.getElementById('qFeedback').classList.add('hidden');
       document.getElementById('btnConfirmar').classList.remove('hidden');
