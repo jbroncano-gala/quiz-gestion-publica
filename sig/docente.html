@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel Docente - CURSO GENERAL</title>
+  <style>
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 20px; }
+    .container { max-width: 1180px; margin: 0 auto; }
+    .header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 18px; }
+    .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    button, select { padding: 10px 14px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13.5px; transition: background 0.2s, transform 0.1s; }
+    button:disabled, select:disabled { opacity: 0.6; cursor: wait; }
+    .btn-on { background: #22c55e; color: #052e16; }
+    .btn-off { background: #ef4444; color: #fff; }
+    .btn-blue { background: #3b82f6; color: #fff; }
+    .btn-orange { background: #f97316; color: #fff; }
+    .btn-yellow { background: #eab308; color: #0f172a; }
+    .btn-gray { background: #64748b; color: #fff; }
+    .btn-emerald { background: #10b981; color: #fff; }
+    .btn-indigo { background: #6366f1; color: #fff; }
+    .sel-purple { background: #a855f7; color: #fff; }
+    .time-bar { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 14px 18px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; }
+    .time-group { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+    .time-item { display: flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 600; color: #cbd5e1; }
+    .time-item select { background: #0f172a; color: #38bdf8; border: 1px solid #475569; padding: 7px 10px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 24px; }
+    .kpi { background: #1e293b; padding: 18px; border-radius: 12px; text-align: center; border: 1px solid #334155; }
+    .kpi-val { font-size: 32px; font-weight: 800; color: #38bdf8; margin-top: 6px; }
+    table { width: 100%; border-collapse: collapse; background: #1e293b; border-radius: 12px; overflow: hidden; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #334155; }
+    th { background: #334155; color: #e2e8f0; }
+    .bad-cell { color: #ef4444; font-weight: 800; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1 style="margin:0;">Panel Docente – CURSO GENERAL</h1>
+        <small id="connStatus" style="color:#94a3b8;">Conectando con Google Sheets...</small>
+      </div>
+      <div class="controls">
+        <button id="btnToggleQuiz" class="btn-off" onclick="toggleQuiz()">○ Quiz INACTIVO (Activar)</button>
+        <select id="selIntentos" class="sel-purple" onchange="cambiarIntentos()">
+          <option value="1">1 Intento único</option>
+          <option value="2" selected>2 Intentos máximo</option>
+        </select>
+        <button id="btnRegla" class="btn-yellow" onclick="toggleRegla()">Regla: Nota 1.er Intento</button>
+        <button id="btnRefresh" class="btn-blue" onclick="cargarDatos(true)">↻ Actualizar</button>
+        <button class="btn-emerald" onclick="abrirSheets()">📊 Sheets</button>
+        <button class="btn-blue" onclick="descargarExcelXLS()">⬇ Excel (.xls)</button>
+        <button class="btn-indigo" onclick="descargarMoodleCSV()">🎓 Exportar Moodle (.csv)</button>
+      </div>
+    </div>
+
+    <div class="time-bar">
+      <div class="time-group">
+        <strong style="color:#38bdf8;">⏱ Duración por pregunta:</strong>
+        <div class="time-item">
+          <label for="tFacil">Fácil:</label>
+          <select id="tFacil"></select>
+        </div>
+        <div class="time-item">
+          <label for="tMedia">Media:</label>
+          <select id="tMedia"></select>
+        </div>
+        <div class="time-item">
+          <label for="tDificil">Difícil:</label>
+          <select id="tDificil"></select>
+        </div>
+      </div>
+      <button id="btnGuardarTiempos" class="btn-blue" onclick="guardarTiempos()">💾 Aplicar Tiempos</button>
+    </div>
+
+    <div class="grid">
+      <div class="kpi"><div>Ingresaron</div><div id="kTotal" class="kpi-val">0</div></div>
+      <div class="kpi"><div>Respondiendo ahora</div><div id="kResp" class="kpi-val">0</div></div>
+      <div class="kpi"><div>En 2.° intento</div><div id="kInt2" class="kpi-val">0</div></div>
+      <div class="kpi"><div>Finalizados</div><div id="kFin" class="kpi-val">0</div></div>
+      <div class="kpi"><div>Promedio Nota Máx.</div><div id="kProm" class="kpi-val">0.00</div></div>
+    </div>
+
+    <h2>🏆 TOP 15 MEJORES (Mayor nota y menor tiempo)</h2>
+    <table>
+      <thead>
+        <tr><th>#</th><th>DNI / Código</th><th>Estudiante</th><th>Aciertos</th><th>Desaciertos</th><th>Tiempo (s)</th><th>Nota Final</th></tr>
+      </thead>
+      <tbody id="top15Body"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzwqN7R5rbXQB2Q_PsyHQRIAfgH1K0FKCNaQO9eVrCdL_ubTYuO6_qaSAVtRAhn-bng3w/exec";
+    let estadoActivo = false, reglaActual = 'PRIMERO', sheetUrl = '', datosCompletos = [];
+    let tiemposInicializados = false, guardandoConfig = false;
+
+    const OPCIONES_TIEMPO = [
+      { seg: 5,   txt: '5 segundos' },
+      { seg: 10,  txt: '10 segundos' },
+      { seg: 15,  txt: '15 segundos' },
+      { seg: 20,  txt: '20 segundos' },
+      { seg: 30,  txt: '30 segundos' },
+      { seg: 45,  txt: '45 segundos' },
+      { seg: 60,  txt: '1 minuto (60 s)' },
+      { seg: 90,  txt: '1 min 30 s (90 s)' },
+      { seg: 120, txt: '2 minutos (120 s)' },
+      { seg: 180, txt: '3 minutos (180 s)' },
+      { seg: 300, txt: '5 minutos (300 s)' }
+    ];
+
+    const CONFIG_REGLA = {
+      'PRIMERO': { texto: 'Regla: Nota 1.er Intento', clase: 'btn-yellow' },
+      'MAXIMA':  { texto: 'Regla: Nota Máxima',      clase: 'btn-orange' },
+      'ULTIMO':  { texto: 'Regla: Nota 2.° Intento', clase: 'btn-gray'   }
+    };
+
+    function poblarSelectsTiempo() {
+      ['tFacil', 'tMedia', 'tDificil'].forEach(id => {
+        const sel = document.getElementById(id);
+        sel.innerHTML = OPCIONES_TIEMPO.map(o => `<option value="${o.seg}">${o.txt}</option>`).join('');
+      });
+      document.getElementById('tFacil').value = '10';
+      document.getElementById('tMedia').value = '15';
+      document.getElementById('tDificil').value = '20';
+    }
+    poblarSelectsTiempo();
+
+    function actualizarBotonReglaUI(regla) {
+      const rKey = CONFIG_REGLA[regla] ? regla : 'PRIMERO';
+      reglaActual = rKey;
+      const bRegla = document.getElementById('btnRegla');
+      bRegla.disabled = false;
+      bRegla.className = CONFIG_REGLA[rKey].clase;
+      bRegla.textContent = CONFIG_REGLA[rKey].texto;
+    }
+
+    function pintarUI(res) {
+      estadoActivo = Boolean(res.activo);
+      const regServidor = String(res.regla || 'PRIMERO').toUpperCase();
+      sheetUrl = res.sheetUrl || '';
+      datosCompletos = res.todos || [];
+
+      const statusEl = document.getElementById('connStatus');
+      statusEl.textContent = '✓ Vinculado en tiempo real • Evaluación del Curso';
+      statusEl.style.color = '#4ade80';
+
+      const bQuiz = document.getElementById('btnToggleQuiz');
+      bQuiz.disabled = false;
+      bQuiz.className = estadoActivo ? 'btn-on' : 'btn-off';
+      bQuiz.textContent = estadoActivo ? '● Quiz ACTIVO (Desactivar)' : '○ Quiz INACTIVO (Activar)';
+
+      const selInt = document.getElementById('selIntentos');
+      selInt.disabled = false;
+      selInt.value = String(Number(res.intentos) === 1 ? 1 : 2);
+
+      if (!tiemposInicializados && res.tiempos) {
+        document.getElementById('tFacil').value = String(res.tiempos.basico || 10);
+        document.getElementById('tMedia').value = String(res.tiempos.intermedio || 15);
+        document.getElementById('tDificil').value = String(res.tiempos.avanzado || 20);
+        tiemposInicializados = true;
+      }
+
+      actualizarBotonReglaUI(regServidor);
+
+      document.getElementById('kTotal').textContent = res.stats.totalIngresados;
+      document.getElementById('kResp').textContent = res.stats.respondiendo;
+      document.getElementById('kInt2').textContent = res.stats.enSegundoIntento;
+      document.getElementById('kFin').textContent = res.stats.finalizados;
+      document.getElementById('kProm').textContent = res.promedioNotaMax;
+
+      const tb = document.getElementById('top15Body');
+      tb.innerHTML = '';
+      (res.top15 || []).forEach((s, i) => {
+        tb.innerHTML += `<tr><td>${i+1}</td><td>${s.dni}</td><td>${s.nombre}</td><td>${s.aciertos}/20</td><td class="bad-cell">${s.desaciertos}</td><td>${s.tiempo}s</td><td><strong>${s.nota}</strong></td></tr>`;
+      });
+    }
+
+    async function cargarDatos(manual = false) {
+      if (guardandoConfig && !manual) return;
+      const btnRef = document.getElementById('btnRefresh');
+      if (manual) { btnRef.disabled = true; btnRef.textContent = '↻ Sincronizando...'; }
+      try {
+        const res = await fetch(`${SCRIPT_URL}?action=teacher&t=${Date.now()}`).then(r => r.json());
+        if (!guardandoConfig) pintarUI(res);
+      } catch (e) {
+        const statusEl = document.getElementById('connStatus');
+        statusEl.textContent = '⚠ Error de red: ' + e.message;
+        statusEl.style.color = '#f87171';
+      } finally {
+        if (manual) { btnRef.disabled = false; btnRef.textContent = '↻ Actualizar'; }
+      }
+    }
+
+    async function toggleQuiz() {
+      guardandoConfig = true;
+      const bQuiz = document.getElementById('btnToggleQuiz');
+      bQuiz.disabled = true;
+      bQuiz.textContent = 'Actualizando...';
+      try {
+        const res = await fetch(`${SCRIPT_URL}?action=setConfig&clave=activo&valor=${!estadoActivo}&t=${Date.now()}`).then(r => r.json());
+        pintarUI(res);
+      } finally {
+        guardandoConfig = false;
+      }
+    }
+
+    async function cambiarIntentos() {
+      guardandoConfig = true;
+      const sel = document.getElementById('selIntentos');
+      const val = sel.value;
+      sel.disabled = true;
+      try {
+        const res = await fetch(`${SCRIPT_URL}?action=setConfig&clave=intentos&valor=${val}&t=${Date.now()}`).then(r => r.json());
+        pintarUI(res);
+      } finally {
+        guardandoConfig = false;
+      }
+    }
+
+    async function toggleRegla() {
+      guardandoConfig = true;
+      const bRegla = document.getElementById('btnRegla');
+      bRegla.disabled = true;
+      bRegla.textContent = 'Cambiando...';
+
+      // Alterna: PRIMERO (Amarillo) -> MAXIMA (Naranja) -> ULTIMO (Gris)
+      const orden = ['PRIMERO', 'MAXIMA', 'ULTIMO'];
+      const idxActual = orden.indexOf(reglaActual);
+      const siguiente = orden[(idxActual === -1 ? 0 : idxActual + 1) % orden.length];
+
+      try {
+        const res = await fetch(`${SCRIPT_URL}?action=setConfig&clave=regla&valor=${siguiente}&t=${Date.now()}`).then(r => r.json());
+        // Si el backend aún no tuviera actualizada la regla en caché, forzamos la UI al siguiente estado
+        if (res && res.regla) {
+          pintarUI(res);
+        } else {
+          actualizarBotonReglaUI(siguiente);
+        }
+      } catch (e) {
+        alert('Error al cambiar la regla: ' + e.message);
+        actualizarBotonReglaUI(reglaActual);
+      } finally {
+        guardandoConfig = false;
+      }
+    }
+
+    async function guardarTiempos() {
+      guardandoConfig = true;
+      const btn = document.getElementById('btnGuardarTiempos');
+      btn.disabled = true;
+      btn.textContent = 'Guardando...';
+      const b = document.getElementById('tFacil').value;
+      const m = document.getElementById('tMedia').value;
+      const a = document.getElementById('tDificil').value;
+      try {
+        const res = await fetch(`${SCRIPT_URL}?action=setTiempos&basico=${b}&intermedio=${m}&avanzado=${a}&t=${Date.now()}`).then(r => r.json());
+        tiemposInicializados = false;
+        pintarUI(res);
+        btn.textContent = '✓ Tiempos Aplicados';
+        setTimeout(() => { btn.textContent = '💾 Aplicar Tiempos'; btn.disabled = false; }, 1500);
+      } catch (e) {
+        btn.disabled = false;
+        btn.textContent = '💾 Aplicar Tiempos';
+        alert('Error al guardar tiempos: ' + e.message);
+      } finally {
+        guardandoConfig = false;
+      }
+    }
+
+    function abrirSheets() {
+      if (sheetUrl) window.open(sheetUrl, '_blank');
+      else alert('Aún no se ha cargado el enlace de Google Sheets.');
+    }
+
+    function normalizarTexto(txt) {
+      return String(txt || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toUpperCase();
+    }
+
+    // Descarga en formato Excel nativo (.xls) con columnas bien estructuradas
+    function descargarExcelXLS() {
+      let filasHtml = '';
+      datosCompletos.forEach((r, idx) => {
+        const idLimpio = String(r.dni || '').trim();
+        const nomNorm = normalizarTexto(r.nombre);
+        filasHtml += `
+          <tr>
+            <td style="text-align:center;">${idx + 1}</td>
+            <td style="mso-number-format:'\\@';">${idLimpio}</td>
+            <td>${nomNorm}</td>
+            <td style="text-align:center;">${r.intento1}</td>
+            <td style="text-align:center;">${r.intento2}</td>
+            <td style="text-align:center;">${r.aciertos}</td>
+            <td style="text-align:center; color:#dc2626; font-weight:bold;">${r.desaciertos}</td>
+            <td style="text-align:center;">${r.tiempo}</td>
+            <td style="text-align:center; font-weight:bold;">${r.nota}</td>
+          </tr>`;
+      });
+
+      const tablaExcel = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office"
+              xmlns:x="urn:schemas-microsoft-com:office:excel"
+              xmlns="http://www.w3.org/TR/REC-html40">
+        <head><meta charset="UTF-8"></head>
+        <body>
+          <table border="1">
+            <thead>
+              <tr style="background-color:#1e293b; color:#ffffff; font-weight:bold;">
+                <th>N°</th>
+                <th>DNI / Código</th>
+                <th>Nombres y Apellidos</th>
+                <th>Intento 1</th>
+                <th>Intento 2</th>
+                <th>Aciertos</th>
+                <th>Desaciertos</th>
+                <th>Tiempo (s)</th>
+                <th>Nota Final</th>
+              </tr>
+            </thead>
+            <tbody>${filasHtml}</tbody>
+          </table>
+        </body>
+        </html>`;
+
+      const blob = new Blob(['\uFEFF' + tablaExcel], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'Notas_Quiz_Curso.xls';
+      a.click();
+    }
+
+    // Descarga en formato CSV para cruce e importación a Moodle
+    function descargarMoodleCSV() {
+      let csv = 'DNI_Codigo,Nombres_Apellidos,Calificacion\n';
+      datosCompletos.forEach(r => {
+        const idLimpio = String(r.dni || '').trim();
+        const nomNorm = normalizarTexto(r.nombre);
+        csv += `"${idLimpio}","${nomNorm}",${r.nota}\n`;
+      });
+      const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'Notas_Para_Moodle.csv';
+      a.click();
+    }
+
+    setInterval(() => cargarDatos(false), 4000);
+    cargarDatos(false);
+  </script>
+</body>
+</html>
