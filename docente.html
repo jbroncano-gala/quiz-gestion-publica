@@ -27,7 +27,7 @@
     table { width: 100%; border-collapse: collapse; background: #1e293b; border-radius: 12px; overflow: hidden; }
     th, td { padding: 12px; text-align: left; border-bottom: 1px solid #334155; }
     th { background: #334155; color: #e2e8f0; }
-    .bad-cell { color: #fca5a5; font-weight: 700; }
+    .bad-cell { color: #ef4444; font-weight: 800; }
   </style>
 </head>
 <body>
@@ -41,9 +41,7 @@
         <button id="btnToggleQuiz" class="btn-off" onclick="toggleQuiz()">○ Quiz INACTIVO (Activar)</button>
         <select id="selIntentos" class="sel-purple" onchange="cambiarIntentos()">
           <option value="1">1 Intento único</option>
-          <option value="2">2 Intentos máximo</option>
-          <option value="3">3 Intentos máximo</option>
-          <option value="4">4 Intentos máximo</option>
+          <option value="2" selected>2 Intentos máximo</option>
         </select>
         <button id="btnRegla" class="btn-amber" onclick="toggleRegla()">Regla: Nota 1.er Intento</button>
         <button id="btnRefresh" class="btn-blue" onclick="cargarDatos(true)">↻ Actualizar</button>
@@ -56,15 +54,15 @@
       <div class="time-group">
         <strong style="color:#38bdf8;">⏱ Duración por pregunta:</strong>
         <div class="time-item">
-          <label for="tFacil">Fácil (Básico):</label>
+          <label for="tFacil">Fácil:</label>
           <select id="tFacil"></select>
         </div>
         <div class="time-item">
-          <label for="tMedia">Media (Intermedio):</label>
+          <label for="tMedia">Media:</label>
           <select id="tMedia"></select>
         </div>
         <div class="time-item">
-          <label for="tDificil">Difícil (Avanzado):</label>
+          <label for="tDificil">Difícil:</label>
           <select id="tDificil"></select>
         </div>
       </div>
@@ -74,7 +72,7 @@
     <div class="grid">
       <div class="kpi"><div>Ingresaron</div><div id="kTotal" class="kpi-val">0</div></div>
       <div class="kpi"><div>Respondiendo ahora</div><div id="kResp" class="kpi-val">0</div></div>
-      <div class="kpi"><div>En reintento (2.°–4.°)</div><div id="kInt2" class="kpi-val">0</div></div>
+      <div class="kpi"><div>En 2.° intento</div><div id="kInt2" class="kpi-val">0</div></div>
       <div class="kpi"><div>Finalizados</div><div id="kFin" class="kpi-val">0</div></div>
       <div class="kpi"><div>Promedio Nota Máx.</div><div id="kProm" class="kpi-val">0.00</div></div>
     </div>
@@ -109,7 +107,7 @@
     const ETIQUETAS_REGLA = {
       'PRIMERO': 'Regla: Nota 1.er Intento',
       'MAXIMA':  'Regla: Nota Máxima',
-      'ULTIMO':  'Regla: Último Intento'
+      'ULTIMO':  'Regla: Nota 2.° Intento'
     };
 
     function poblarSelectsTiempo() {
@@ -117,6 +115,9 @@
         const sel = document.getElementById(id);
         sel.innerHTML = OPCIONES_TIEMPO.map(o => `<option value="${o.seg}">${o.txt}</option>`).join('');
       });
+      document.getElementById('tFacil').value = '10';
+      document.getElementById('tMedia').value = '15';
+      document.getElementById('tDificil').value = '20';
     }
     poblarSelectsTiempo();
 
@@ -137,12 +138,12 @@
 
       const selInt = document.getElementById('selIntentos');
       selInt.disabled = false;
-      if (res.intentos) selInt.value = String(res.intentos);
+      selInt.value = String(Number(res.intentos) === 1 ? 1 : 2);
 
       if (!tiemposInicializados && res.tiempos) {
-        document.getElementById('tFacil').value = String(res.tiempos.basico || 5);
-        document.getElementById('tMedia').value = String(res.tiempos.intermedio || 10);
-        document.getElementById('tDificil').value = String(res.tiempos.avanzado || 15);
+        document.getElementById('tFacil').value = String(res.tiempos.basico || 10);
+        document.getElementById('tMedia').value = String(res.tiempos.intermedio || 15);
+        document.getElementById('tDificil').value = String(res.tiempos.avanzado || 20);
         tiemposInicializados = true;
       }
 
@@ -230,9 +231,9 @@
     }
 
     function descargarExcel() {
-      let csv = 'DNI_Codigo,Nombres_Apellidos,Historial_Intentos,Aciertos,Desaciertos,Tiempo_Seg,Nota_Final\n';
+      let csv = 'DNI_Codigo,Nombres_Apellidos,Intento1,Intento2,Aciertos,Desaciertos,Tiempo_Seg,Nota_Final\n';
       datosCompletos.forEach(r => {
-        csv += `"${r.dni}","${r.nombre}","${r.intentosTxt}",${r.aciertos},${r.desaciertos},${r.tiempo},${r.nota}\n`;
+        csv += `"${r.dni}","${r.nombre}",${r.intento1},${r.intento2},${r.aciertos},${r.desaciertos},${r.tiempo},${r.nota}\n`;
       });
       const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
       const a = document.createElement('a');
