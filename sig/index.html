@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz - Sistemas de Información para la Gestión Pública</title>
+  <style>
+    * {
+      -webkit-user-select: none !important;
+      -moz-user-select: none !important;
+      -ms-user-select: none !important;
+      user-select: none !important;
+      -webkit-touch-callout: none !important;
+    }
+    input {
+      -webkit-user-select: text !important;
+      user-select: text !important;
+    }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #f1f5f9;
+      margin: 0;
+      padding: 16px;
+      color: #1e293b;
+    }
+    .no-copy-text {
+      pointer-events: none;
+    }
+    .shield-overlay {
+      position: fixed;
+      inset: 0;
+      background: #0f172a;
+      color: #f8fafc;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 20px;
+      font-weight: 700;
+      z-index: 99999;
+      padding: 24px;
+    }
+    .shield-overlay.active {
+      display: flex;
+    }
+    .card { max-width: 680px; margin: 0 auto; background: #fff; border-radius: 14px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    .status-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 10px; }
+    .badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; font-weight: 700; font-size: 14px; white-space: nowrap; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .online { background: #dcfce7; color: #166534; } .online .dot { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+    .offline { background: #fee2e2; color: #991b1b; } .offline .dot { background: #ef4444; }
+    input { width: 100%; padding: 12px; margin: 8px 0 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+    button { width: 100%; padding: 14px; border: none; border-radius: 10px; background: #1d4ed8; color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.15s; }
+    button:disabled { background: #94a3b8; cursor: not-allowed; }
+    .btn-next { background: #0f172a; }
+    .btn-retry { background: #16a34a; margin-top: 14px; }
+    .btn-retry:hover:not(:disabled) { background: #15803d; }
+    .info-box { background: #eff6ff; border-left: 4px solid #2563eb; padding: 12px 16px; border-radius: 8px; font-size: 14px; margin-bottom: 16px; line-height: 1.5; }
+    .opt { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; margin: 8px 0; border: 2px solid #e2e8f0; border-radius: 10px; cursor: pointer; transition: 0.15s; font-weight: 500; }
+    .opt.selected { border-color: #2563eb; background: #eff6ff; }
+    .opt.correct-box { border-color: #16a34a !important; background: #dcfce7 !important; color: #14532d; font-weight: 700; }
+    .opt.wrong-box { border-color: #dc2626 !important; background: #fee2e2 !important; color: #7f1d1d; font-weight: 700; }
+    .feedback-banner { padding: 12px 16px; border-radius: 10px; margin-top: 14px; font-size: 14px; font-weight: 600; line-height: 1.4; }
+    .fb-ok { background: #dcfce7; border: 1px solid #86efac; color: #166534; }
+    .fb-err { background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; }
+    .timer { font-size: 20px; font-weight: 800; color: #dc2626; }
+    .hidden { display: none; }
+    .metric-box { background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 12px; padding: 24px; text-align: center; margin-top: 16px; }
+    .watermark { font-size: 11px; color: #94a3b8; text-align: right; margin-bottom: 6px; }
+    @media print { html, body { display: none !important; } }
+  </style>
+</head>
+<body oncontextmenu="return false;" oncopy="return false;" oncut="return false;" onpaste="return false;" onselectstart="return false;" ondragstart="return false;">
+  <div id="shieldOverlay" class="shield-overlay">
+    🔒 Contenido protegido<br><br>No está permitido cambiar de ventana, copiar ni capturar pantalla durante la evaluación.
+  </div>
+
+  <div class="card" id="mainCard">
+    <div class="status-bar">
+      <strong>Gestión Pública – Evaluación</strong>
+      <span id="statusBadge" class="badge offline"><span class="dot"></span><span id="statusText">Verificando...</span></span>
+    </div>
+
+    <!-- PANTALLA DE INGRESO -->
+    <div id="viewLogin">
+      <h2>Evaluación: Sistemas de Información</h2>
+      <div class="info-box">
+        <strong>Indicaciones:</strong><br>
+        • Ingresa tu <strong>Código de estudiante o DNI</strong> y tus <strong>Nombres y Apellidos completos</strong>.<br>
+        • Intentos permitidos: <strong id="lblIntentos">2 intentos máximo</strong>.<br>
+        • Duración por pregunta: <strong id="lblTiempos">Fácil: 10 s | Media: 15 s | Difícil: 20 s</strong>.<br>
+        • Está bloqueada la copia, captura de pantalla y el cambio de ventana durante la evaluación.
+      </div>
+      <label>Código de estudiante o DNI</label>
+      <input type="text" id="dni" placeholder="Ej. 20191234 o 45678912" />
+      <label>Nombres y Apellidos completos</label>
+      <input type="text" id="nombre" placeholder="Ej. Juan Carlos Pérez López" />
+      <button id="btnIniciar" onclick="iniciarQuiz()" disabled>Conectando con el docente...</button>
+      <p id="loginMsg" style="color:#dc2626; font-weight:600;"></p>
+    </div>
+
+    <!-- PANTALLA DEL QUIZ -->
+    <div id="viewQuiz" class="hidden">
+      <div class="watermark no-copy-text" id="wmStudent"></div>
+      <div class="status-bar">
+        <span id="qMeta" class="no-copy-text" style="font-weight:600; color:#475569;"></span>
+        <span class="timer no-copy-text">⏱ <span id="qTimer">0</span></span>
+      </div>
+      <h3 id="qText" class="no-copy-text"></h3>
+      <div id="qOptions"></div>
+      <div id="qFeedback" class="feedback-banner hidden no-copy-text"></div>
+      <button id="btnConfirmar" onclick="verificarRespuesta()" style="margin-top:14px;">Confirmar respuesta</button>
+      <button id="btnSiguiente" onclick="avanzarPregunta()" class="btn-next hidden" style="margin-top:14px;">Siguiente pregunta →</button>
+    </div>
+
+    <!-- PANTALLA FINAL (CON BOTÓN DIRECTO AL INTENTO 2 SI ESTÁ HABILITADO) -->
+    <div id="viewEnd" class="hidden">
+      <h2 style="text-align:center; margin-bottom:6px;">¡Evaluación Finalizada!</h2>
+      <p id="endStudentMsg" style="text-align:center; color:#475569; margin-top:0;"></p>
+      <div class="metric-box">
+        <div style="font-size:15px; color:#64748b; font-weight:600;">Nota Obtenida</div>
+        <div id="finalNotaDecimal" style="font-size:48px; font-weight:800; color:#1d4ed8; margin:6px 0;">0.00</div>
+        <div id="finalAciertosFrac" style="font-size:22px; font-weight:700; color:#0f172a;">0/20</div>
+      </div>
+
+      <div id="boxSiguienteIntento" class="hidden" style="margin-top:18px; text-align:center;">
+        <p id="retryHint" style="font-size:14px; color:#334155; margin-bottom:8px;">Tienes habilitado el 2.° intento para mejorar tu resultado.</p>
+        <button id="btnSiguienteIntento" class="btn-retry" onclick="iniciarSegundoIntento()">Iniciar 2.° Intento →</button>
+        <p id="retryMsg" style="color:#dc2626; font-weight:600; margin-top:8px;"></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzwqN7R5rbXQB2Q_PsyHQRIAfgH1K0FKCNaQO9eVrCdL_ubTYuO6_qaSAVtRAhn-bng3w/exec";
+
+    const PREGUNTAS = [
+      { id: 1, nivel: "Básico", bloom: "Recordar", texto: "Según Laudon & Laudon, un SI integra personas, procesos, datos y tecnología. ¿Qué plataforma del MEF integra presupuesto, tesorería, contabilidad y endeudamiento?", opciones: ["SIGA", "SIAF", "SEACE", "PLAME", "INVIERTE.PE"], correctas: [1] },
+      { id: 2, nivel: "Básico", bloom: "Recordar", texto: "¿Qué organismo administra actualmente el SEACE y la plataforma PLADICOP bajo la Ley 32069?", opciones: ["MEF", "SUNAT", "OECE", "PCM", "SBN"], correctas: [2] },
+      { id: 3, nivel: "Básico", bloom: "Recordar", texto: "¿Qué norma establece el marco legal de la Ley de Gobierno Digital en el Perú?", opciones: ["DL 1439", "Ley 32069", "DL 1412", "DL 1252", "Ley 32513"], correctas: [2] },
+      { id: 4, nivel: "Básico", bloom: "Recordar", texto: "¿Cuáles de los siguientes módulos pertenecen al SIGA? (Selecciona 3)", opciones: ["Logística", "Almacén", "Patrimonio", "Endeudamiento Público", "PLAME"], correctas: [0, 1, 2] },
+      { id: 5, nivel: "Básico", bloom: "Comprender", texto: "En la Consulta Amigable del MEF, ¿cómo se calcula el avance de ejecución presupuestal?", opciones: ["Certificado ÷ PIA", "Compromiso ÷ PIM", "Devengado ÷ PIM", "Girado ÷ PIA", "Pagado ÷ Certificado"], correctas: [2] },
+      { id: 6, nivel: "Básico", bloom: "Recordar", texto: "¿Qué entidades administran T-Registro/PLAME e INVIERTE.PE respectivamente? (Selecciona 2)", opciones: ["SUNAT (T-Registro/PLAME)", "MEF - DGPMI (INVIERTE.PE)", "OECE (INVIERTE.PE)", "PCM (PLAME)", "Contraloría (T-Registro)"], correctas: [0, 1] },
+      { id: 7, nivel: "Intermedio", bloom: "Comprender", texto: "Caso Bono Familiar Universal (S/ 579 180 de perjuicio): ¿qué fallas de datos detectó la Contraloría? (Selecciona 2)", opciones: ["Carga parcialmente manual del padrón", "Falta de configuración y validación del software", "Exceso de interoperabilidad PIDE", "Uso del catálogo SIGA", "Cierre del año fiscal"], correctas: [0, 1] },
+      { id: 8, nivel: "Intermedio", bloom: "Comprender", texto: "¿Cuáles son los módulos que conforman el SIAF Web? (Selecciona 3)", opciones: ["MPP (Presupuestario)", "MAD (Administrativo)", "MADAF (Autorizaciones)", "PAC (Plan Anual)", "SBN (Patrimonio)"], correctas: [0, 1, 2] },
+      { id: 9, nivel: "Intermedio", bloom: "Aplicar", texto: "Caso Universidad Pública: surge una compra urgente de software no prevista. ¿Qué debe hacerse antes de convocar? (Selecciona 2)", opciones: ["Modificar el PAC con sustento", "Registrar la modificación en SEACE/PLADICOP", "Emitir el devengado directo en SIAF", "Dar de baja en SIGA", "Omitir requerimiento"], correctas: [0, 1] },
+      { id: 10, nivel: "Intermedio", bloom: "Aplicar", texto: "En el SIAF, ¿qué requisitos son obligatorios para registrar el Devengado sin observaciones de control? (Selecciona 2)", opciones: ["Conformidad del área usuaria o almacén", "Comprobante de pago sustentatorio", "Publicación en El Peruano", "Pago bancario previo", "Aprobación del Tribunal"], correctas: [0, 1] },
+      { id: 11, nivel: "Intermedio", bloom: "Comprender", texto: "¿Qué afirmaciones describen correctamente a la PIDE? (Selecciona 2)", opciones: ["Permite consumir servicios de información entre entidades", "La administra la SGTD de la PCM", "Es una base de datos central única", "Reemplaza al SIAF", "Comparte datos sin control de acceso"], correctas: [0, 1] },
+      { id: 12, nivel: "Intermedio", bloom: "Recordar", texto: "¿Cuáles son las tres etapas de la Cadena de Abastecimiento Público (DL 1439)? (Selecciona 3)", opciones: ["Programación", "Adquisición", "Administración", "Endeudamiento", "Liquidación tributaria"], correctas: [0, 1, 2] },
+      { id: 13, nivel: "Intermedio", bloom: "Aplicar", texto: "Un municipio exige un documento que otra entidad ya posee. ¿Qué norma prohíbe esto si hay interoperabilidad?", opciones: ["Ley 32069", "Decreto Legislativo N.° 1246", "DL 1440", "DS 217-2019-EF", "Ley 29158"], correctas: [1] },
+      { id: 14, nivel: "Intermedio", bloom: "Comprender", texto: "¿Qué relación existe entre el SIGA y el SIAF en el flujo del gasto? (Selecciona 2)", opciones: ["El SIGA alimenta al SIAF con información logística", "La orden de compra se vincula con certificación y compromiso SIAF", "El SIGA reemplaza al SIAF en pagos", "El SIAF controla existencias físicas", "No comparten clasificadores"], correctas: [0, 1] },
+      { id: 15, nivel: "Intermedio", bloom: "Comprender", texto: "¿Qué fases de la contratación pública se registran obligatoriamente en SEACE/PLADICOP? (Selecciona 3)", opciones: ["Actos preparatorios", "Selección", "Ejecución contractual", "Planilla mensual", "Evaluación del PIA"], correctas: [0, 1, 2] },
+      { id: 16, nivel: "Intermedio", bloom: "Aplicar", texto: "Caso Hospital Víctor Ramos Guardia (Huaraz, S/ 43 920): ¿qué medidas evitan pagos irregulares de bonos? (Selecciona 2)", opciones: ["Integrar registros de personal, asistencia y planillas", "Validar requisitos de elegibilidad y aprobaciones", "Eliminar controles posteriores", "Usar hojas Excel aisladas", "Desactivar tesorería"], correctas: [0, 1] },
+      { id: 17, nivel: "Avanzado", bloom: "Analizar", texto: "Caso SISFOH (86 000 hogares mal clasificados): ¿qué impacto directo genera en la gestión pública? (Selecciona 2)", opciones: ["Pérdida de precisión en focalización social", "Asignación ineficiente de recursos y políticas desalineadas", "Aumento automático del PIA", "Mayor velocidad de girado", "Fin de la interoperabilidad"], correctas: [0, 1] },
+      { id: 18, nivel: "Avanzado", bloom: "Analizar", texto: "Caso Municipalidad de Áncash (padrones en Excel y demoras): ¿qué arquitectura resuelve las causas raíz? (Selecciona 3)", opciones: ["Depurar base y validar DNI con interoperabilidad", "Automatizar alertas y seguimiento de reclamos", "Gobernanza de datos con indicadores de duplicidad", "Comprar PCs rápidas manteniendo Excel", "Restringir reclamos ciudadanos"], correctas: [0, 1, 2] },
+      { id: 19, nivel: "Avanzado", bloom: "Analizar", texto: "¿Qué secuencia lógica entre POI, PIA y PAC garantiza el alineamiento y legalidad del gasto?", opciones: ["PAC define metas → PIA elige proveedores → POI paga", "POI define qué se hará → PIA asegura recursos → PAC organiza contrataciones", "PIA define necesidades → PAC aprueba presupuesto → POI ejecuta", "PAC reemplaza al POI", "Operan independientemente"], correctas: [1] },
+      { id: 20, nivel: "Avanzado", bloom: "Analizar", texto: "Ante filtraciones (RENIEC 2025, PNP, Telegram 2026), ¿qué equilibrio exige un SI público moderno? (Selecciona 2)", opciones: ["Interoperabilidad con controles de acceso y trazabilidad", "Finalidad legítima y seguridad supervisada por la ANPD", "Bloquear todo intercambio de datos", "Ignorar protección de datos por eficiencia", "Publicar padrones completos en web"], correctas: [0, 1] }
+    ];
+
+    // Blindaje anti-copia, anti-captura y pantalla negra al salir de foco
+    function activarEscudo(temporal = false) {
+      const enQuiz = !document.getElementById('viewQuiz').classList.contains('hidden');
+      if (!enQuiz) return;
+      const sh = document.getElementById('shieldOverlay');
+      sh.classList.add('active');
+      if (temporal) {
+        setTimeout(() => sh.classList.remove('active'), 2000);
+      }
+    }
+    function desactivarEscudo() {
+      document.getElementById('shieldOverlay').classList.remove('active');
+    }
+
+    document.addEventListener('keydown', (e) => {
+      const k = e.key.toLowerCase();
+      if ((e.ctrlKey || e.metaKey) && ['c', 'x', 'u', 's', 'p', 'a', 'v'].includes(k)) {
+        e.preventDefault();
+        activarEscudo(true);
+      }
+      if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['i', 'j', 'c', 's'].includes(k)) || (e.metaKey && e.shiftKey && ['s', '3', '4', '5'].includes(k))) {
+        e.preventDefault();
+        activarEscudo(true);
+      }
+      if (e.key === 'PrintScreen') {
+        e.preventDefault();
+        navigator.clipboard?.writeText('').catch(() => {});
+        activarEscudo(true);
+      }
+    });
+    document.addEventListener('keyup', (e) => {
+      if (e.key === 'PrintScreen') {
+        navigator.clipboard?.writeText('').catch(() => {});
+        activarEscudo(true);
+      }
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) activarEscudo(false);
+      else desactivarEscudo();
+    });
+    window.addEventListener('blur', () => activarEscudo(false));
+    window.addEventListener('focus', () => desactivarEscudo());
+
+    let quizActivo = false, intentoActual = 1, maxIntentos = 2;
+    let tiemposDocente = { basico: 10, intermedio: 15, avanzado: 20 };
+    let idx = 0, aciertos = 0, tiempoTotal = 0, tiempoPreguntaActual = 15;
+    let seleccion = new Set(), timerInt = null, tiempoRestante = 0, respondida = false;
+
+    function formatearDuracionTexto(seg) {
+      if (seg < 60) return `${seg} s`;
+      const m = Math.floor(seg / 60);
+      const s = seg % 60;
+      return s === 0 ? `${m} min` : `${m} min ${s} s`;
+    }
+
+    function formatearReloj(seg) {
+      if (seg < 60) return `${seg}s`;
+      const m = Math.floor(seg / 60);
+      const s = String(seg % 60).padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    function actualizarIndicacionesUI() {
+      document.getElementById('lblIntentos').textContent = maxIntentos === 1 ? '1 intento único' : '2 intentos máximo';
+      document.getElementById('lblTiempos').textContent =
+        `Fácil: ${formatearDuracionTexto(tiemposDocente.basico)} | ` +
+        `Media: ${formatearDuracionTexto(tiemposDocente.intermedio)} | ` +
+        `Difícil: ${formatearDuracionTexto(tiemposDocente.avanzado)}`;
+
+      const enFinal = !document.getElementById('viewEnd').classList.contains('hidden');
+      if (enFinal) actualizarBotonSegundoIntento();
+    }
+
+    function actualizarBotonSegundoIntento() {
+      const boxRetry = document.getElementById('boxSiguienteIntento');
+      const btnRetry = document.getElementById('btnSiguienteIntento');
+
+      if (intentoActual === 1 && maxIntentos === 2) {
+        boxRetry.classList.remove('hidden');
+        if (quizActivo) {
+          btnRetry.disabled = false;
+          btnRetry.textContent = 'Iniciar 2.° Intento →';
+        } else {
+          btnRetry.disabled = true;
+          btnRetry.textContent = 'Quiz cerrado por el docente';
+        }
+      } else {
+        boxRetry.classList.add('hidden');
+      }
+    }
+
+    async function checkStatus() {
+      const badge = document.getElementById('statusBadge');
+      const txt = document.getElementById('statusText');
+      const btn = document.getElementById('btnIniciar');
+      try {
+        const res = await fetch(`${SCRIPT_URL}?action=status&t=${Date.now()}`);
+        const data = await res.json();
+
+        quizActivo = Boolean(data.activo);
+        maxIntentos = Number(data.intentos) === 1 ? 1 : 2;
+        if (data.tiempos) {
+          tiemposDocente = {
+            basico: Number(data.tiempos.basico) || 10,
+            intermedio: Number(data.tiempos.intermedio) || 15,
+            avanzado: Number(data.tiempos.avanzado) || 20
+          };
+        }
+        actualizarIndicacionesUI();
+
+        if (quizActivo) {
+          badge.className = 'badge online';
+          txt.textContent = 'Conectado';
+          if (btn.textContent !== 'Ingresando...') {
+            btn.disabled = false;
+            btn.textContent = 'Iniciar Evaluación';
+          }
+        } else {
+          badge.className = 'badge offline';
+          txt.textContent = 'Desconectado';
+          btn.disabled = true;
+          btn.textContent = 'Quiz desactivado por el docente';
+        }
+      } catch (e) {
+        badge.className = 'badge offline';
+        txt.textContent = 'Reintentando...';
+      }
+    }
+    setInterval(checkStatus, 3000);
+    checkStatus();
+
+    async function ejecutarInicio(btnElement, msgElement) {
+      const dni = document.getElementById('dni').value.trim();
+      const nombre = document.getElementById('nombre').value.trim();
+      msgElement.textContent = '';
+
+      if (!dni || !nombre) {
+        msgElement.textContent = 'Completa tu DNI/Código y Nombres.';
+        return;
+      }
+
+      const textoOriginal = btnElement.textContent;
+      btnElement.disabled = true;
+      btnElement.textContent = 'Ingresando...';
+
+      try {
+        const url = `${SCRIPT_URL}?action=start&dni=${encodeURIComponent(dni)}&nombre=${encodeURIComponent(nombre)}&t=${Date.now()}`;
+        const resp = await fetch(url).then(r => r.json());
+
+        if (!resp.ok) {
+          msgElement.textContent = resp.msg;
+          btnElement.disabled = false;
+          btnElement.textContent = textoOriginal;
+          return;
+        }
+
+        intentoActual = resp.intento;
+        if (resp.maxIntentos) maxIntentos = Number(resp.maxIntentos) === 1 ? 1 : 2;
+        if (resp.tiempos) {
+          tiemposDocente = {
+            basico: Number(resp.tiempos.basico) || 10,
+            intermedio: Number(resp.tiempos.intermedio) || 15,
+            avanzado: Number(resp.tiempos.avanzado) || 20
+          };
+        }
+
+        idx = 0; aciertos = 0; tiempoTotal = 0;
+        document.getElementById('wmStudent').textContent = `Estudiante: ${nombre} (${dni})`;
+        document.getElementById('viewLogin').classList.add('hidden');
+        document.getElementById('viewEnd').classList.add('hidden');
+        document.getElementById('viewQuiz').classList.remove('hidden');
+        mostrarPregunta();
+      } catch (e) {
+        msgElement.textContent = 'Error de conexión al iniciar. Intenta nuevamente.';
+        btnElement.disabled = false;
+        btnElement.textContent = textoOriginal;
+      }
+    }
+
+    function iniciarQuiz() {
+      ejecutarInicio(document.getElementById('btnIniciar'), document.getElementById('loginMsg'));
+    }
+
+    function iniciarSegundoIntento() {
+      ejecutarInicio(document.getElementById('btnSiguienteIntento'), document.getElementById('retryMsg'));
+    }
+
+    function mostrarPregunta() {
+      const p = PREGUNTAS[idx];
+      seleccion.clear();
+      respondida = false;
+
+      if (p.nivel === 'Básico') tiempoPreguntaActual = Number(tiemposDocente.basico) || 10;
+      else if (p.nivel === 'Intermedio') tiempoPreguntaActual = Number(tiemposDocente.intermedio) || 15;
+      else tiempoPreguntaActual = Number(tiemposDocente.avanzado) || 20;
+
+      document.getElementById('qFeedback').classList.add('hidden');
+      document.getElementById('btnConfirmar').classList.remove('hidden');
+      const btnSig = document.getElementById('btnSiguiente');
+      btnSig.classList.add('hidden');
+      btnSig.disabled = false;
+      btnSig.textContent = (idx + 1 < PREGUNTAS.length) ? 'Siguiente pregunta →' : 'Finalizar y ver mi nota';
+
+      document.getElementById('qMeta').textContent = `Intento ${intentoActual}/${maxIntentos} • Pregunta ${idx + 1}/${PREGUNTAS.length} (${p.correctas.length} resp.)`;
+      document.getElementById('qText').textContent = p.texto;
+
+      const cont = document.getElementById('qOptions');
+      cont.innerHTML = '';
+      p.opciones.forEach((op, i) => {
+        const div = document.createElement('div');
+        div.className = 'opt';
+        div.id = `opt_${i}`;
+        div.innerHTML = `<span class="no-copy-text">${String.fromCharCode(65 + i)}) ${op}</span><span class="opt-tag no-copy-text"></span>`;
+        div.onclick = () => {
+          if (respondida) return;
+          if (seleccion.has(i)) { seleccion.delete(i); div.classList.remove('selected'); }
+          else { seleccion.add(i); div.classList.add('selected'); }
+        };
+        cont.appendChild(div);
+      });
+
+      tiempoRestante = tiempoPreguntaActual;
+      document.getElementById('qTimer').textContent = formatearReloj(tiempoRestante);
+      clearInterval(timerInt);
+      timerInt = setInterval(() => {
+        tiempoRestante--;
+        document.getElementById('qTimer').textContent = formatearReloj(Math.max(0, tiempoRestante));
+        if (tiempoRestante <= 0) verificarRespuesta(true);
+      }, 1000);
+    }
+
+    function verificarRespuesta(porTiempo = false) {
+      if (respondida) return;
+      respondida = true;
+      clearInterval(timerInt);
+
+      const p = PREGUNTAS[idx];
+      tiempoTotal += (tiempoPreguntaActual - Math.max(0, tiempoRestante));
+
+      const correctSet = new Set(p.correctas);
+      const selArr = Array.from(seleccion).sort().join(',');
+      const corArr = [...p.correctas].sort().join(',');
+      const esCorrecta = (selArr === corArr);
+      if (esCorrecta) aciertos++;
+
+      const totalPreguntas = PREGUNTAS.length;
+      const notaParcial = Number(((aciertos / totalPreguntas) * 20).toFixed(2));
+      const desaciertosTotales = totalPreguntas - aciertos;
+      const dni = document.getElementById('dni').value.trim();
+      const progUrl = `${SCRIPT_URL}?action=progress&dni=${encodeURIComponent(dni)}&intento=${intentoActual}&nota=${notaParcial}&desaciertos=${desaciertosTotales}&tiempo=${tiempoTotal}&t=${Date.now()}`;
+      fetch(progUrl, { keepalive: true }).catch(() => {});
+
+      p.opciones.forEach((_, i) => {
+        const el = document.getElementById(`opt_${i}`);
+        el.classList.remove('selected');
+        el.style.cursor = 'default';
+        const tag = el.querySelector('.opt-tag');
+
+        if (correctSet.has(i)) {
+          el.classList.add('correct-box');
+          tag.textContent = seleccion.has(i) ? '✓ Correcta' : '✓ Era correcta';
+        } else if (seleccion.has(i)) {
+          el.classList.add('wrong-box');
+          tag.textContent = '✗ Incorrecta';
+        }
+      });
+
+      const letrasCorrectas = [...p.correctas]
+        .sort((a, b) => a - b)
+        .map(i => `${String.fromCharCode(65 + i)}) ${p.opciones[i]}`)
+        .join(' | ');
+
+      const fb = document.getElementById('qFeedback');
+      fb.classList.remove('hidden', 'fb-ok', 'fb-err');
+      if (esCorrecta) {
+        fb.classList.add('fb-ok');
+        fb.textContent = '¡Respuesta correcta!';
+      } else {
+        fb.classList.add('fb-err');
+        fb.innerHTML = `${porTiempo ? '⏱ Se agotó el tiempo.' : '✗ Respuesta incorrecta.'}<br>Alternativa(s) correcta(s): <strong>${letrasCorrectas}</strong>`;
+      }
+
+      document.getElementById('btnConfirmar').classList.add('hidden');
+      document.getElementById('btnSiguiente').classList.remove('hidden');
+    }
+
+    async function avanzarPregunta() {
+      idx++;
+      if (idx < PREGUNTAS.length) {
+        mostrarPregunta();
+      } else {
+        const btnSig = document.getElementById('btnSiguiente');
+        btnSig.disabled = true;
+        btnSig.textContent = 'Guardando calificación...';
+
+        const totalPreguntas = PREGUNTAS.length;
+        const notaNum = Number(((aciertos / totalPreguntas) * 20).toFixed(2));
+        const desaciertosTotales = totalPreguntas - aciertos;
+        const notaFormateada = notaNum.toFixed(2);
+        const dni = document.getElementById('dni').value.trim();
+
+        try {
+          const url = `${SCRIPT_URL}?action=finish&dni=${encodeURIComponent(dni)}&intento=${intentoActual}&nota=${notaNum}&desaciertos=${desaciertosTotales}&tiempo=${tiempoTotal}&t=${Date.now()}`;
+          await fetch(url);
+        } catch (e) {}
+
+        desactivarEscudo();
+        document.getElementById('viewQuiz').classList.add('hidden');
+        document.getElementById('viewEnd').classList.remove('hidden');
+        document.getElementById('endStudentMsg').textContent = `Intento ${intentoActual} de ${maxIntentos} registrado correctamente.`;
+        document.getElementById('finalNotaDecimal').textContent = notaFormateada;
+        document.getElementById('finalAciertosFrac').textContent = `${aciertos}/${totalPreguntas}`;
+        document.getElementById('retryMsg').textContent = '';
+        actualizarBotonSegundoIntento();
+      }
+    }
+  </script>
+</body>
+</html>
