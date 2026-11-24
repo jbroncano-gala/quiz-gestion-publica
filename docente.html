@@ -9,12 +9,14 @@
     .container { max-width: 1180px; margin: 0 auto; }
     .header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 18px; }
     .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-    button, select { padding: 10px 14px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13.5px; }
+    button, select { padding: 10px 14px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13.5px; transition: background 0.2s, transform 0.1s; }
     button:disabled, select:disabled { opacity: 0.6; cursor: wait; }
     .btn-on { background: #22c55e; color: #052e16; }
     .btn-off { background: #ef4444; color: #fff; }
     .btn-blue { background: #3b82f6; color: #fff; }
-    .btn-amber { background: #f59e0b; color: #1e293b; }
+    .btn-orange { background: #f97316; color: #fff; }
+    .btn-yellow { background: #eab308; color: #0f172a; }
+    .btn-gray { background: #64748b; color: #fff; }
     .btn-emerald { background: #10b981; color: #fff; }
     .btn-indigo { background: #6366f1; color: #fff; }
     .sel-purple { background: #a855f7; color: #fff; }
@@ -44,10 +46,10 @@
           <option value="1">1 Intento único</option>
           <option value="2" selected>2 Intentos máximo</option>
         </select>
-        <button id="btnRegla" class="btn-amber" onclick="toggleRegla()">Regla: Nota 1.er Intento</button>
+        <button id="btnRegla" class="btn-yellow" onclick="toggleRegla()">Regla: Nota 1.er Intento</button>
         <button id="btnRefresh" class="btn-blue" onclick="cargarDatos(true)">↻ Actualizar</button>
         <button class="btn-emerald" onclick="abrirSheets()">📊 Sheets</button>
-        <button class="btn-blue" onclick="descargarExcel()">⬇ Excel (.csv)</button>
+        <button class="btn-blue" onclick="descargarExcelXLS()">⬇ Excel (.xls)</button>
         <button class="btn-indigo" onclick="descargarMoodleCSV()">🎓 Exportar Moodle (.csv)</button>
       </div>
     </div>
@@ -90,7 +92,8 @@
 
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzwqN7R5rbXQB2Q_PsyHQRIAfgH1K0FKCNaQO9eVrCdL_ubTYuO6_qaSAVtRAhn-bng3w/exec";
-    let estadoActivo = false, reglaActual = 'PRIMERO', sheetUrl = '', datosCompletos = [], tiemposInicializados = false;
+    let estadoActivo = false, reglaActual = 'PRIMERO', sheetUrl = '', datosCompletos = [];
+    let tiemposInicializados = false, guardandoConfig = false;
 
     const OPCIONES_TIEMPO = [
       { seg: 5,   txt: '5 segundos' },
@@ -106,10 +109,10 @@
       { seg: 300, txt: '5 minutos (300 s)' }
     ];
 
-    const ETIQUETAS_REGLA = {
-      'PRIMERO': 'Regla: Nota 1.er Intento',
-      'MAXIMA':  'Regla: Nota Máxima',
-      'ULTIMO':  'Regla: Nota 2.° Intento'
+    const CONFIG_REGLA = {
+      'PRIMERO': { texto: 'Regla: Nota 1.er Intento', clase: 'btn-yellow' },
+      'MAXIMA':  { texto: 'Regla: Nota Máxima',      clase: 'btn-orange' },
+      'ULTIMO':  { texto: 'Regla: Nota 2.° Intento', clase: 'btn-gray'   }
     };
 
     function poblarSelectsTiempo() {
@@ -123,9 +126,18 @@
     }
     poblarSelectsTiempo();
 
+    function actualizarBotonReglaUI(regla) {
+      const rKey = CONFIG_REGLA[regla] ? regla : 'PRIMERO';
+      reglaActual = rKey;
+      const bRegla = document.getElementById('btnRegla');
+      bRegla.disabled = false;
+      bRegla.className = CONFIG_REGLA[rKey].clase;
+      bRegla.textContent = CONFIG_REGLA[rKey].texto;
+    }
+
     function pintarUI(res) {
       estadoActivo = Boolean(res.activo);
-      reglaActual = String(res.regla || 'PRIMERO').toUpperCase();
+      const regServidor = String(res.regla || 'PRIMERO').toUpperCase();
       sheetUrl = res.sheetUrl || '';
       datosCompletos = res.todos || [];
 
@@ -149,9 +161,7 @@
         tiemposInicializados = true;
       }
 
-      const bRegla = document.getElementById('btnRegla');
-      bRegla.disabled = false;
-      bRegla.textContent = ETIQUETAS_REGLA[reglaActual] || 'Regla: Nota 1.er Intento';
+      actualizarBotonReglaUI(regServidor);
 
       document.getElementById('kTotal').textContent = res.stats.totalIngresados;
       document.getElementById('kResp').textContent = res.stats.respondiendo;
@@ -167,11 +177,12 @@
     }
 
     async function cargarDatos(manual = false) {
+      if (guardandoConfig && !manual) return;
       const btnRef = document.getElementById('btnRefresh');
       if (manual) { btnRef.disabled = true; btnRef.textContent = '↻ Sincronizando...'; }
       try {
         const res = await fetch(`${SCRIPT_URL}?action=teacher&t=${Date.now()}`).then(r => r.json());
-        pintarUI(res);
+        if (!guardandoConfig) pintarUI(res);
       } catch (e) {
         const statusEl = document.getElementById('connStatus');
         statusEl.textContent = '⚠ Error de red: ' + e.message;
@@ -182,32 +193,60 @@
     }
 
     async function toggleQuiz() {
+      guardandoConfig = true;
       const bQuiz = document.getElementById('btnToggleQuiz');
       bQuiz.disabled = true;
       bQuiz.textContent = 'Actualizando...';
-      const res = await fetch(`${SCRIPT_URL}?action=setConfig&clave=activo&valor=${!estadoActivo}&t=${Date.now()}`).then(r => r.json());
-      pintarUI(res);
+      try {
+        const res = await fetch(`${SCRIPT_URL}?action=setConfig&clave=activo&valor=${!estadoActivo}&t=${Date.now()}`).then(r => r.json());
+        pintarUI(res);
+      } finally {
+        guardandoConfig = false;
+      }
     }
 
     async function cambiarIntentos() {
+      guardandoConfig = true;
       const sel = document.getElementById('selIntentos');
       const val = sel.value;
       sel.disabled = true;
-      const res = await fetch(`${SCRIPT_URL}?action=setConfig&clave=intentos&valor=${val}&t=${Date.now()}`).then(r => r.json());
-      pintarUI(res);
+      try {
+        const res = await fetch(`${SCRIPT_URL}?action=setConfig&clave=intentos&valor=${val}&t=${Date.now()}`).then(r => r.json());
+        pintarUI(res);
+      } finally {
+        guardandoConfig = false;
+      }
     }
 
     async function toggleRegla() {
+      guardandoConfig = true;
       const bRegla = document.getElementById('btnRegla');
       bRegla.disabled = true;
       bRegla.textContent = 'Cambiando...';
+
+      // Alterna: PRIMERO (Amarillo) -> MAXIMA (Naranja) -> ULTIMO (Gris)
       const orden = ['PRIMERO', 'MAXIMA', 'ULTIMO'];
-      const siguiente = orden[(orden.indexOf(reglaActual) + 1) % orden.length];
-      const res = await fetch(`${SCRIPT_URL}?action=setConfig&clave=regla&valor=${siguiente}&t=${Date.now()}`).then(r => r.json());
-      pintarUI(res);
+      const idxActual = orden.indexOf(reglaActual);
+      const siguiente = orden[(idxActual === -1 ? 0 : idxActual + 1) % orden.length];
+
+      try {
+        const res = await fetch(`${SCRIPT_URL}?action=setConfig&clave=regla&valor=${siguiente}&t=${Date.now()}`).then(r => r.json());
+        // Si el backend aún no tuviera actualizada la regla en caché, forzamos la UI al siguiente estado
+        if (res && res.regla) {
+          pintarUI(res);
+        } else {
+          actualizarBotonReglaUI(siguiente);
+        }
+      } catch (e) {
+        alert('Error al cambiar la regla: ' + e.message);
+        actualizarBotonReglaUI(reglaActual);
+      } finally {
+        guardandoConfig = false;
+      }
     }
 
     async function guardarTiempos() {
+      guardandoConfig = true;
       const btn = document.getElementById('btnGuardarTiempos');
       btn.disabled = true;
       btn.textContent = 'Guardando...';
@@ -224,6 +263,8 @@
         btn.disabled = false;
         btn.textContent = '💾 Aplicar Tiempos';
         alert('Error al guardar tiempos: ' + e.message);
+      } finally {
+        guardandoConfig = false;
       }
     }
 
@@ -241,20 +282,59 @@
         .toUpperCase();
     }
 
-    function descargarExcel() {
-      let csv = 'DNI_Codigo,Nombres_Apellidos,Intento1,Intento2,Aciertos,Desaciertos,Tiempo_Seg,Nota_Final\n';
-      datosCompletos.forEach(r => {
+    // Descarga en formato Excel nativo (.xls) con columnas bien estructuradas
+    function descargarExcelXLS() {
+      let filasHtml = '';
+      datosCompletos.forEach((r, idx) => {
         const idLimpio = String(r.dni || '').trim();
         const nomNorm = normalizarTexto(r.nombre);
-        csv += `"${idLimpio}","${nomNorm}",${r.intento1},${r.intento2},${r.aciertos},${r.desaciertos},${r.tiempo},${r.nota}\n`;
+        filasHtml += `
+          <tr>
+            <td style="text-align:center;">${idx + 1}</td>
+            <td style="mso-number-format:'\\@';">${idLimpio}</td>
+            <td>${nomNorm}</td>
+            <td style="text-align:center;">${r.intento1}</td>
+            <td style="text-align:center;">${r.intento2}</td>
+            <td style="text-align:center;">${r.aciertos}</td>
+            <td style="text-align:center; color:#dc2626; font-weight:bold;">${r.desaciertos}</td>
+            <td style="text-align:center;">${r.tiempo}</td>
+            <td style="text-align:center; font-weight:bold;">${r.nota}</td>
+          </tr>`;
       });
-      const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+
+      const tablaExcel = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office"
+              xmlns:x="urn:schemas-microsoft-com:office:excel"
+              xmlns="http://www.w3.org/TR/REC-html40">
+        <head><meta charset="UTF-8"></head>
+        <body>
+          <table border="1">
+            <thead>
+              <tr style="background-color:#1e293b; color:#ffffff; font-weight:bold;">
+                <th>N°</th>
+                <th>DNI / Código</th>
+                <th>Nombres y Apellidos</th>
+                <th>Intento 1</th>
+                <th>Intento 2</th>
+                <th>Aciertos</th>
+                <th>Desaciertos</th>
+                <th>Tiempo (s)</th>
+                <th>Nota Final</th>
+              </tr>
+            </thead>
+            <tbody>${filasHtml}</tbody>
+          </table>
+        </body>
+        </html>`;
+
+      const blob = new Blob(['\uFEFF' + tablaExcel], { type: 'application/vnd.ms-excel;charset=utf-8;' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = 'Notas_Quiz_Curso.csv';
+      a.download = 'Notas_Quiz_Curso.xls';
       a.click();
     }
 
+    // Descarga en formato CSV para cruce e importación a Moodle
     function descargarMoodleCSV() {
       let csv = 'DNI_Codigo,Nombres_Apellidos,Calificacion\n';
       datosCompletos.forEach(r => {
