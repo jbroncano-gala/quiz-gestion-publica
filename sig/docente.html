@@ -3,354 +3,398 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Panel Docente - SISTEMAS DE INFORMACIÓN GERENCIAL</title>
+  <title>Panel Docente — Control de Evaluación</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
-    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 20px; }
-    .container { max-width: 1180px; margin: 0 auto; }
-    .header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 18px; }
-    .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-    button, select { padding: 10px 14px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13.5px; transition: background 0.2s, transform 0.1s; }
-    button:disabled, select:disabled { opacity: 0.6; cursor: wait; }
-    .btn-on { background: #22c55e; color: #052e16; }
-    .btn-off { background: #ef4444; color: #fff; }
-    .btn-blue { background: #3b82f6; color: #fff; }
-    .btn-orange { background: #f97316; color: #fff; }
-    .btn-yellow { background: #eab308; color: #0f172a; }
-    .btn-gray { background: #64748b; color: #fff; }
-    .btn-emerald { background: #10b981; color: #fff; }
-    .btn-indigo { background: #6366f1; color: #fff; }
-    .sel-purple { background: #a855f7; color: #fff; }
-    .time-bar { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 14px 18px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; }
-    .time-group { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
-    .time-item { display: flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 600; color: #cbd5e1; }
-    .time-item select { background: #0f172a; color: #38bdf8; border: 1px solid #475569; padding: 7px 10px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 24px; }
-    .kpi { background: #1e293b; padding: 18px; border-radius: 12px; text-align: center; border: 1px solid #334155; }
-    .kpi-val { font-size: 32px; font-weight: 800; color: #38bdf8; margin-top: 6px; }
-    table { width: 100%; border-collapse: collapse; background: #1e293b; border-radius: 12px; overflow: hidden; }
-    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #334155; }
-    th { background: #334155; color: #e2e8f0; }
-    .bad-cell { color: #ef4444; font-weight: 800; }
+    :root {
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --border: #cbd5e1;
+      --primary: #1d4ed8;
+      --primary-hover: #1e40af;
+      --success: #16a34a;
+      --success-hover: #15803d;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 24px 16px;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 920px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: #0f172a;
+      color: #ffffff;
+      padding: 20px 24px;
+      border-radius: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .badge-curso {
+      background: #2563eb;
+      color: #ffffff;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+    }
+
+    /* Sección QR */
+    .qr-layout {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .qr-info {
+      flex: 1;
+      min-width: 260px;
+    }
+
+    .qr-tag {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+
+    .qr-info h2 {
+      margin: 0 0 8px 0;
+      font-size: 18px;
+    }
+
+    .url-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 13px;
+      color: var(--muted);
+      word-break: break-all;
+      margin-bottom: 14px;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    button {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .btn-primary { background: var(--primary); color: #ffffff; }
+    .btn-primary:hover { background: var(--primary-hover); }
+
+    .btn-success { background: var(--success); color: #ffffff; }
+    .btn-success:hover { background: var(--success-hover); }
+
+    .btn-light {
+      background: #f1f5f9;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-light:hover { background: #e2e8f0; }
+
+    .qr-box {
+      background: #ffffff;
+      padding: 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      flex-shrink: 0;
+    }
+
+    /* Modal Proyector */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.85);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 28px;
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-card h3 {
+      margin: 0 0 6px 0;
+      font-size: 21px;
+    }
+
+    .modal-qr {
+      display: flex;
+      justify-content: center;
+      padding: 16px;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      margin: 16px 0;
+      background: #ffffff;
+    }
+
+    /* Conexión opcional a Google Sheets / Apps Script */
+    .script-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .script-row input {
+      flex: 1;
+      min-width: 240px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      font-size: 13px;
+    }
+
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #e2e8f0;
+      text-align: left;
+    }
+
+    th {
+      background: #f8fafc;
+      font-weight: 700;
+    }
   </style>
 </head>
 <body>
   <div class="container">
+    <!-- Encabezado -->
     <div class="header">
       <div>
-        <h1 style="margin:0;">Panel Docente – SISTEMAS DE INFORMACIÓN GERENCIAL</h1>
-        <small id="connStatus" style="color:#94a3b8;">Conectando con Google Sheets...</small>
+        <h1>Panel Docente — Evaluación en Aula</h1>
+        <div style="font-size:13px; color:#cbd5e1; margin-top:4px;">UNASAM • Gestión y Control de Evaluaciones</div>
       </div>
-      <div class="controls">
-        <button id="btnToggleQuiz" class="btn-off" onclick="toggleQuiz()">○ Quiz INACTIVO (Activar)</button>
-        <select id="selIntentos" class="sel-purple" onchange="cambiarIntentos()">
-          <option value="1">1 Intento único</option>
-          <option value="2" selected>2 Intentos máximo</option>
-        </select>
-        <button id="btnRegla" class="btn-yellow" onclick="toggleRegla()">Regla: Nota 1.er Intento</button>
-        <button id="btnRefresh" class="btn-blue" onclick="cargarDatos(true)">↻ Actualizar</button>
-        <button class="btn-emerald" onclick="abrirSheets()">📊 Sheets</button>
-        <button class="btn-blue" onclick="descargarExcelXLS()">⬇ Excel (.xls)</button>
-        <button class="btn-indigo" onclick="descargarMoodleCSV()">🎓 Exportar Moodle (.csv)</button>
+      <span id="badge-curso" class="badge-curso">CURSO</span>
+    </div>
+
+    <!-- Tarjeta QR Automático -->
+    <div class="card">
+      <div class="qr-layout">
+        <div class="qr-info">
+          <div class="qr-tag">Acceso directo para estudiantes</div>
+          <h2>Escanea el código QR para iniciar el examen</h2>
+          <div id="texto-url-curso" class="url-box"></div>
+          <div class="btn-group">
+            <button type="button" class="btn-primary" onclick="abrirModalQR()">Ampliar QR (Proyector)</button>
+            <button type="button" id="btn-copiar" class="btn-light" onclick="copiarEnlace()">Copiar enlace</button>
+            <button type="button" class="btn-success" onclick="descargarQR()">Descargar QR (PNG)</button>
+            <button type="button" class="btn-light" onclick="abrirExamen()">Abrir vista alumno</button>
+          </div>
+        </div>
+        <div id="qr-contenedor" class="qr-box"></div>
       </div>
     </div>
 
-    <div class="time-bar">
-      <div class="time-group">
-        <strong style="color:#38bdf8;">⏱ Duración por pregunta:</strong>
-        <div class="time-item">
-          <label for="tFacil">Fácil:</label>
-          <select id="tFacil"></select>
-        </div>
-        <div class="time-item">
-          <label for="tMedia">Media:</label>
-          <select id="tMedia"></select>
-        </div>
-        <div class="time-item">
-          <label for="tDificil">Difícil:</label>
-          <select id="tDificil"></select>
-        </div>
+    <!-- Tarjeta Resultados (Opcional con Google Apps Script) -->
+    <div class="card">
+      <h3 style="margin:0 0 6px 0; font-size:16px;">Resultados en tiempo real (Google Sheets)</h3>
+      <p style="margin:0; font-size:13px; color:var(--muted);">
+        Pega la URL de tu Web App de Google Apps Script de este curso para consultar las notas enviadas:
+      </p>
+      <div class="script-row">
+        <input type="text" id="input-script-url" placeholder="https://script.google.com/macros/s/.../exec" />
+        <button type="button" class="btn-primary" onclick="guardarYCargarNotas()">Cargar resultados</button>
       </div>
-      <button id="btnGuardarTiempos" class="btn-blue" onclick="guardarTiempos()">💾 Aplicar Tiempos</button>
+      <div id="estado-notas" style="font-size:13px; color:var(--muted); margin-top:10px;"></div>
+      <div style="overflow-x:auto;">
+        <table id="tabla-resultados" style="display:none;">
+          <thead id="tabla-head"></thead>
+          <tbody id="tabla-body"></tbody>
+        </table>
+      </div>
     </div>
+  </div>
 
-    <div class="grid">
-      <div class="kpi"><div>Ingresaron</div><div id="kTotal" class="kpi-val">0</div></div>
-      <div class="kpi"><div>Respondiendo ahora</div><div id="kResp" class="kpi-val">0</div></div>
-      <div class="kpi"><div>En 2.° intento</div><div id="kInt2" class="kpi-val">0</div></div>
-      <div class="kpi"><div>Finalizados</div><div id="kFin" class="kpi-val">0</div></div>
-      <div class="kpi"><div>Promedio Nota Máx.</div><div id="kProm" class="kpi-val">0.00</div></div>
+  <!-- Modal Pantalla Grande para Proyector -->
+  <div id="modal-qr" class="modal-overlay" onclick="if(event.target===this)cerrarModalQR()">
+    <div class="modal-card">
+      <h3>Escanea para rendir la evaluación</h3>
+      <p id="texto-url-modal" style="font-size:13px; color:var(--muted); word-break:break-all; margin:0;"></p>
+      <div id="qr-grande" class="modal-qr"></div>
+      <button type="button" class="btn-primary" style="width:100%; background:#0f172a;" onclick="cerrarModalQR()">
+        Cerrar vista ampliada
+      </button>
     </div>
-
-    <h2>🏆 TOP 15 MEJORES (Mayor nota y menor tiempo)</h2>
-    <table>
-      <thead>
-        <tr><th>#</th><th>DNI / Código</th><th>Estudiante</th><th>Aciertos</th><th>Desaciertos</th><th>Tiempo (s)</th><th>Nota Final</th></tr>
-      </thead>
-      <tbody id="top15Body"></tbody>
-    </table>
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwLECbsWrs-tpaxaS51hAVBGnT9Lj95Btpr43-WcnywOBbmZ9TojjUEkv047wh8M4Ak/exec";
-    let estadoActivo = false, reglaActual = 'PRIMERO', sheetUrl = '', datosCompletos = [];
-    let tiemposInicializados = false, guardandoConfig = false;
+    // 1. Detecta automáticamente la URL base de la carpeta del curso (apunta a index.html del curso)
+    const urlExamen = new URL("./", window.location.href).href;
 
-    const OPCIONES_TIEMPO = [
-      { seg: 5,   txt: '5 segundos' },
-      { seg: 10,  txt: '10 segundos' },
-      { seg: 15,  txt: '15 segundos' },
-      { seg: 20,  txt: '20 segundos' },
-      { seg: 30,  txt: '30 segundos' },
-      { seg: 45,  txt: '45 segundos' },
-      { seg: 60,  txt: '1 minuto (60 s)' },
-      { seg: 90,  txt: '1 min 30 s (90 s)' },
-      { seg: 120, txt: '2 minutos (120 s)' },
-      { seg: 180, txt: '3 minutos (180 s)' },
-      { seg: 300, txt: '5 minutos (300 s)' }
-    ];
+    // Extrae el nombre de la carpeta del curso para mostrarlo en la etiqueta superior
+    const segmentos = window.location.pathname.split("/").filter(Boolean);
+    const carpetaCurso = segmentos.length >= 2 ? segmentos[segmentos.length - 2] : "EVALUACIÓN";
+    document.getElementById("badge-curso").textContent = decodeURIComponent(carpetaCurso);
+    document.getElementById("texto-url-curso").textContent = urlExamen;
+    document.getElementById("texto-url-modal").textContent = urlExamen;
 
-    const CONFIG_REGLA = {
-      'PRIMERO': { texto: 'Regla: Nota 1.er Intento', clase: 'btn-yellow' },
-      'MAXIMA':  { texto: 'Regla: Nota Máxima',      clase: 'btn-orange' },
-      'ULTIMO':  { texto: 'Regla: Nota 2.° Intento', clase: 'btn-gray'   }
-    };
+    // 2. Genera el QR principal
+    new QRCode(document.getElementById("qr-contenedor"), {
+      text: urlExamen,
+      width: 160,
+      height: 160,
+      colorDark: "#0f172a",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.H
+    });
 
-    function poblarSelectsTiempo() {
-      ['tFacil', 'tMedia', 'tDificil'].forEach(id => {
-        const sel = document.getElementById(id);
-        sel.innerHTML = OPCIONES_TIEMPO.map(o => `<option value="${o.seg}">${o.txt}</option>`).join('');
-      });
-      document.getElementById('tFacil').value = '10';
-      document.getElementById('tMedia').value = '15';
-      document.getElementById('tDificil').value = '20';
-    }
-    poblarSelectsTiempo();
-
-    function actualizarBotonReglaUI(regla) {
-      const rKey = CONFIG_REGLA[regla] ? regla : 'PRIMERO';
-      reglaActual = rKey;
-      const bRegla = document.getElementById('btnRegla');
-      bRegla.disabled = false;
-      bRegla.className = CONFIG_REGLA[rKey].clase;
-      bRegla.textContent = CONFIG_REGLA[rKey].texto;
-    }
-
-    function pintarUI(res) {
-      estadoActivo = Boolean(res.activo);
-      const regServidor = String(res.regla || 'PRIMERO').toUpperCase();
-      sheetUrl = res.sheetUrl || '';
-      datosCompletos = res.todos || [];
-
-      const statusEl = document.getElementById('connStatus');
-      statusEl.textContent = '✓ Vinculado en tiempo real • Evaluación del Curso';
-      statusEl.style.color = '#4ade80';
-
-      const bQuiz = document.getElementById('btnToggleQuiz');
-      bQuiz.disabled = false;
-      bQuiz.className = estadoActivo ? 'btn-on' : 'btn-off';
-      bQuiz.textContent = estadoActivo ? '● Quiz ACTIVO (Desactivar)' : '○ Quiz INACTIVO (Activar)';
-
-      const selInt = document.getElementById('selIntentos');
-      selInt.disabled = false;
-      selInt.value = String(Number(res.intentos) === 1 ? 1 : 2);
-
-      if (!tiemposInicializados && res.tiempos) {
-        document.getElementById('tFacil').value = String(res.tiempos.basico || 10);
-        document.getElementById('tMedia').value = String(res.tiempos.intermedio || 15);
-        document.getElementById('tDificil').value = String(res.tiempos.avanzado || 20);
-        tiemposInicializados = true;
+    // 3. Modal ampliado para proyector
+    let qrModalGenerado = false;
+    function abrirModalQR() {
+      document.getElementById("modal-qr").style.display = "flex";
+      if (!qrModalGenerado) {
+        new QRCode(document.getElementById("qr-grande"), {
+          text: urlExamen,
+          width: 330,
+          height: 330,
+          colorDark: "#0f172a",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.H
+        });
+        qrModalGenerado = true;
       }
+    }
 
-      actualizarBotonReglaUI(regServidor);
+    function cerrarModalQR() {
+      document.getElementById("modal-qr").style.display = "none";
+    }
 
-      document.getElementById('kTotal').textContent = res.stats.totalIngresados;
-      document.getElementById('kResp').textContent = res.stats.respondiendo;
-      document.getElementById('kInt2').textContent = res.stats.enSegundoIntento;
-      document.getElementById('kFin').textContent = res.stats.finalizados;
-      document.getElementById('kProm').textContent = res.promedioNotaMax;
-
-      const tb = document.getElementById('top15Body');
-      tb.innerHTML = '';
-      (res.top15 || []).forEach((s, i) => {
-        tb.innerHTML += `<tr><td>${i+1}</td><td>${s.dni}</td><td>${s.nombre}</td><td>${s.aciertos}/20</td><td class="bad-cell">${s.desaciertos}</td><td>${s.tiempo}s</td><td><strong>${s.nota}</strong></td></tr>`;
+    // 4. Copiar enlace, abrir vista alumno y descargar PNG con margen blanco
+    function copiarEnlace() {
+      const btn = document.getElementById("btn-copiar");
+      navigator.clipboard.writeText(urlExamen).then(() => {
+        btn.textContent = "¡Enlace copiado!";
+        setTimeout(() => { btn.textContent = "Copiar enlace"; }, 2000);
       });
     }
 
-    async function cargarDatos(manual = false) {
-      if (guardandoConfig && !manual) return;
-      const btnRef = document.getElementById('btnRefresh');
-      if (manual) { btnRef.disabled = true; btnRef.textContent = '↻ Sincronizando...'; }
-      try {
-        const res = await fetch(`${SCRIPT_URL}?action=teacher&t=${Date.now()}`).then(r => r.json());
-        if (!guardandoConfig) pintarUI(res);
-      } catch (e) {
-        const statusEl = document.getElementById('connStatus');
-        statusEl.textContent = '⚠ Error de red: ' + e.message;
-        statusEl.style.color = '#f87171';
-      } finally {
-        if (manual) { btnRef.disabled = false; btnRef.textContent = '↻ Actualizar'; }
-      }
+    function abrirExamen() {
+      window.open(urlExamen, "_blank");
     }
 
-    async function toggleQuiz() {
-      guardandoConfig = true;
-      const bQuiz = document.getElementById('btnToggleQuiz');
-      bQuiz.disabled = true;
-      bQuiz.textContent = 'Actualizando...';
-      try {
-        const res = await fetch(`${SCRIPT_URL}?action=setConfig&clave=activo&valor=${!estadoActivo}&t=${Date.now()}`).then(r => r.json());
-        pintarUI(res);
-      } finally {
-        guardandoConfig = false;
-      }
+    function descargarQR() {
+      const canvasOrigen = document.querySelector("#qr-contenedor canvas");
+      if (!canvasOrigen) return;
+      const margen = 24;
+      const canvasFinal = document.createElement("canvas");
+      canvasFinal.width = canvasOrigen.width + margen * 2;
+      canvasFinal.height = canvasOrigen.height + margen * 2;
+      const ctx = canvasFinal.getContext("2d");
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvasFinal.width, canvasFinal.height);
+      ctx.drawImage(canvasOrigen, margen, margen);
+
+      const enlace = document.createElement("a");
+      enlace.download = `QR-${carpetaCurso}.png`;
+      enlace.href = canvasFinal.toDataURL("image/png");
+      enlace.click();
     }
 
-    async function cambiarIntentos() {
-      guardandoConfig = true;
-      const sel = document.getElementById('selIntentos');
-      const val = sel.value;
-      sel.disabled = true;
-      try {
-        const res = await fetch(`${SCRIPT_URL}?action=setConfig&clave=intentos&valor=${val}&t=${Date.now()}`).then(r => r.json());
-        pintarUI(res);
-      } finally {
-        guardandoConfig = false;
-      }
+    // 5. Carga opcional de notas desde Google Apps Script (guardado por carpeta de curso)
+    const storageKey = "apps_script_url_" + carpetaCurso;
+    const inputScript = document.getElementById("input-script-url");
+    const savedUrl = localStorage.getItem(storageKey);
+    if (savedUrl) {
+      inputScript.value = savedUrl;
+      cargarNotas(savedUrl);
     }
 
-    async function toggleRegla() {
-      guardandoConfig = true;
-      const bRegla = document.getElementById('btnRegla');
-      bRegla.disabled = true;
-      bRegla.textContent = 'Cambiando...';
+    function guardarYCargarNotas() {
+      const url = inputScript.value.trim();
+      if (!url) return;
+      localStorage.setItem(storageKey, url);
+      cargarNotas(url);
+    }
 
-      // Alterna: PRIMERO (Amarillo) -> MAXIMA (Naranja) -> ULTIMO (Gris)
-      const orden = ['PRIMERO', 'MAXIMA', 'ULTIMO'];
-      const idxActual = orden.indexOf(reglaActual);
-      const siguiente = orden[(idxActual === -1 ? 0 : idxActual + 1) % orden.length];
-
+    async function cargarNotas(scriptUrl) {
+      const estado = document.getElementById("estado-notas");
+      const tabla = document.getElementById("tabla-resultados");
+      estado.textContent = "Consultando registros...";
       try {
-        const res = await fetch(`${SCRIPT_URL}?action=setConfig&clave=regla&valor=${siguiente}&t=${Date.now()}`).then(r => r.json());
-        // Si el backend aún no tuviera actualizada la regla en caché, forzamos la UI al siguiente estado
-        if (res && res.regla) {
-          pintarUI(res);
-        } else {
-          actualizarBotonReglaUI(siguiente);
+        const resp = await fetch(scriptUrl);
+        const datos = await resp.json();
+        const filas = Array.isArray(datos) ? datos : (datos.data || datos.rows || []);
+        if (!filas.length) {
+          estado.textContent = "Aún no hay envíos registrados.";
+          tabla.style.display = "none";
+          return;
         }
-      } catch (e) {
-        alert('Error al cambiar la regla: ' + e.message);
-        actualizarBotonReglaUI(reglaActual);
-      } finally {
-        guardandoConfig = false;
+        const columnas = Object.keys(filas[0]);
+        document.getElementById("tabla-head").innerHTML =
+          "<tr>" + columnas.map(c => `<th>${c}</th>`).join("") + "</tr>";
+        document.getElementById("tabla-body").innerHTML =
+          filas.map(f => "<tr>" + columnas.map(c => `<td>${f[c] ?? ""}</td>`).join("") + "</tr>").join("");
+        tabla.style.display = "table";
+        estado.textContent = `Total de registros: ${filas.length}`;
+      } catch (err) {
+        estado.textContent = "No se pudo leer el JSON desde esa URL. Verifica que el Apps Script devuelva datos con doGet().";
       }
     }
-
-    async function guardarTiempos() {
-      guardandoConfig = true;
-      const btn = document.getElementById('btnGuardarTiempos');
-      btn.disabled = true;
-      btn.textContent = 'Guardando...';
-      const b = document.getElementById('tFacil').value;
-      const m = document.getElementById('tMedia').value;
-      const a = document.getElementById('tDificil').value;
-      try {
-        const res = await fetch(`${SCRIPT_URL}?action=setTiempos&basico=${b}&intermedio=${m}&avanzado=${a}&t=${Date.now()}`).then(r => r.json());
-        tiemposInicializados = false;
-        pintarUI(res);
-        btn.textContent = '✓ Tiempos Aplicados';
-        setTimeout(() => { btn.textContent = '💾 Aplicar Tiempos'; btn.disabled = false; }, 1500);
-      } catch (e) {
-        btn.disabled = false;
-        btn.textContent = '💾 Aplicar Tiempos';
-        alert('Error al guardar tiempos: ' + e.message);
-      } finally {
-        guardandoConfig = false;
-      }
-    }
-
-    function abrirSheets() {
-      if (sheetUrl) window.open(sheetUrl, '_blank');
-      else alert('Aún no se ha cargado el enlace de Google Sheets.');
-    }
-
-    function normalizarTexto(txt) {
-      return String(txt || '')
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/\s+/g, ' ')
-        .trim()
-        .toUpperCase();
-    }
-
-    // Descarga en formato Excel nativo (.xls) con columnas bien estructuradas
-    function descargarExcelXLS() {
-      let filasHtml = '';
-      datosCompletos.forEach((r, idx) => {
-        const idLimpio = String(r.dni || '').trim();
-        const nomNorm = normalizarTexto(r.nombre);
-        filasHtml += `
-          <tr>
-            <td style="text-align:center;">${idx + 1}</td>
-            <td style="mso-number-format:'\\@';">${idLimpio}</td>
-            <td>${nomNorm}</td>
-            <td style="text-align:center;">${r.intento1}</td>
-            <td style="text-align:center;">${r.intento2}</td>
-            <td style="text-align:center;">${r.aciertos}</td>
-            <td style="text-align:center; color:#dc2626; font-weight:bold;">${r.desaciertos}</td>
-            <td style="text-align:center;">${r.tiempo}</td>
-            <td style="text-align:center; font-weight:bold;">${r.nota}</td>
-          </tr>`;
-      });
-
-      const tablaExcel = `
-        <html xmlns:o="urn:schemas-microsoft-com:office:office"
-              xmlns:x="urn:schemas-microsoft-com:office:excel"
-              xmlns="http://www.w3.org/TR/REC-html40">
-        <head><meta charset="UTF-8"></head>
-        <body>
-          <table border="1">
-            <thead>
-              <tr style="background-color:#1e293b; color:#ffffff; font-weight:bold;">
-                <th>N°</th>
-                <th>DNI / Código</th>
-                <th>Nombres y Apellidos</th>
-                <th>Intento 1</th>
-                <th>Intento 2</th>
-                <th>Aciertos</th>
-                <th>Desaciertos</th>
-                <th>Tiempo (s)</th>
-                <th>Nota Final</th>
-              </tr>
-            </thead>
-            <tbody>${filasHtml}</tbody>
-          </table>
-        </body>
-        </html>`;
-
-      const blob = new Blob(['\uFEFF' + tablaExcel], { type: 'application/vnd.ms-excel;charset=utf-8;' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'Notas_Quiz_Curso.xls';
-      a.click();
-    }
-
-    // Descarga en formato CSV para cruce e importación a Moodle
-    function descargarMoodleCSV() {
-      let csv = 'DNI_Codigo,Nombres_Apellidos,Calificacion\n';
-      datosCompletos.forEach(r => {
-        const idLimpio = String(r.dni || '').trim();
-        const nomNorm = normalizarTexto(r.nombre);
-        csv += `"${idLimpio}","${nomNorm}",${r.nota}\n`;
-      });
-      const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'Notas_Para_Moodle.csv';
-      a.click();
-    }
-
-    setInterval(() => cargarDatos(false), 4000);
-    cargarDatos(false);
   </script>
 </body>
 </html>
