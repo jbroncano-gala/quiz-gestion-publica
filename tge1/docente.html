@@ -32,12 +32,8 @@
       color: var(--text);
     }
 
-    .container {
-      max-width: 1120px;
-      margin: 0 auto;
-    }
+    .container { max-width: 1120px; margin: 0 auto; }
 
-    /* Encabezado */
     .title {
       margin: 0 0 6px 0;
       font-size: 30px;
@@ -47,12 +43,35 @@
 
     .subtitle {
       font-size: 14px;
-      color: #22c55e;
+      color: #94a3b8;
       margin-bottom: 18px;
       font-weight: 500;
     }
 
-    /* Barra superior de acciones */
+    /* Caja de respaldo si falta SCRIPT_URL */
+    .setup-box {
+      display: none;
+      background: #1e293b;
+      border: 1px solid #f59e0b;
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 18px;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .setup-box input {
+      flex: 1;
+      min-width: 260px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      border: 1px solid #475569;
+      background: #0f172a;
+      color: #f8fafc;
+      font-size: 13px;
+    }
+
     .toolbar {
       display: flex;
       flex-wrap: wrap;
@@ -72,11 +91,11 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      transition: opacity 0.15s ease, transform 0.1s ease;
+      transition: opacity 0.15s ease;
     }
 
     .btn:hover, .select-pill:hover { opacity: 0.92; }
-    .btn:active { transform: scale(0.99); }
+    .btn:disabled { opacity: 0.6; cursor: wait; }
 
     .btn-active { background: var(--green); }
     .btn-inactive { background: var(--red); }
@@ -86,7 +105,6 @@
     .btn-teal { background: var(--teal); }
     .btn-indigo { background: var(--indigo); }
 
-    /* Barra de duración por pregunta */
     .duration-bar {
       background: var(--panel);
       border: 1px solid var(--panel-border);
@@ -108,10 +126,7 @@
       font-size: 14px;
     }
 
-    .duration-title {
-      color: var(--cyan);
-      font-weight: 700;
-    }
+    .duration-title { color: var(--cyan); font-weight: 700; }
 
     .duration-controls label {
       display: inline-flex;
@@ -131,7 +146,6 @@
       outline: none;
     }
 
-    /* 5 Tarjetas de resumen */
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -151,20 +165,9 @@
       text-align: center;
     }
 
-    .kpi-label {
-      font-size: 13.5px;
-      color: #cbd5e1;
-      margin-bottom: 10px;
-    }
+    .kpi-label { font-size: 13.5px; color: #cbd5e1; margin-bottom: 10px; }
+    .kpi-value { font-size: 32px; font-weight: 800; color: var(--cyan); line-height: 1.1; }
 
-    .kpi-value {
-      font-size: 32px;
-      font-weight: 800;
-      color: var(--cyan);
-      line-height: 1.1;
-    }
-
-    /* Tabla TOP 15 MEJORES */
     .section-heading {
       font-size: 20px;
       font-weight: 800;
@@ -182,34 +185,21 @@
       margin-bottom: 26px;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-    }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    thead { background: #2b384d; }
+    th { padding: 12px 16px; text-align: left; font-weight: 700; color: #f1f5f9; white-space: nowrap; }
+    td { padding: 11px 16px; border-top: 1px solid var(--panel-border); color: #e2e8f0; }
+    .empty-row { text-align: center; color: var(--muted); padding: 18px; }
 
-    thead {
-      background: #2b384d;
-    }
-
-    th {
-      padding: 12px 16px;
-      text-align: left;
+    .badge-live {
+      display: inline-block;
+      font-size: 11px;
       font-weight: 700;
-      color: #f1f5f9;
-      white-space: nowrap;
-    }
-
-    td {
-      padding: 11px 16px;
-      border-top: 1px solid var(--panel-border);
-      color: #e2e8f0;
-    }
-
-    .empty-row {
-      text-align: center;
-      color: var(--muted);
-      padding: 18px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      margin-left: 6px;
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
     }
 
     /* Tarjeta QR (debajo de TOP 15 MEJORES) */
@@ -228,7 +218,6 @@
     }
 
     .qr-info { flex: 1; min-width: 260px; }
-
     .qr-tag {
       font-size: 12px;
       font-weight: 700;
@@ -237,13 +226,7 @@
       color: #1d4ed8;
       margin-bottom: 4px;
     }
-
-    .qr-info h3 {
-      margin: 0 0 8px 0;
-      font-size: 18px;
-      color: #0f172a;
-    }
-
+    .qr-info h3 { margin: 0 0 8px 0; font-size: 18px; color: #0f172a; }
     .url-box {
       background: #f8fafc;
       border: 1px solid #e2e8f0;
@@ -254,21 +237,10 @@
       word-break: break-all;
       margin-bottom: 14px;
     }
-
-    .qr-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
+    .qr-actions { display: flex; flex-wrap: wrap; gap: 10px; }
     .btn-qr-primary { background: #1d4ed8; color: #ffffff; }
     .btn-qr-success { background: #16a34a; color: #ffffff; }
-    .btn-qr-light {
-      background: #f8fafc;
-      color: #0f172a;
-      border: 1px solid #cbd5e1;
-    }
-
+    .btn-qr-light { background: #f8fafc; color: #0f172a; border: 1px solid #cbd5e1; }
     .qr-box {
       background: #ffffff;
       padding: 10px;
@@ -277,7 +249,6 @@
       flex-shrink: 0;
     }
 
-    /* Modal Proyector */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -288,7 +259,6 @@
       justify-content: center;
       padding: 20px;
     }
-
     .modal-card {
       background: #ffffff;
       border-radius: 16px;
@@ -299,7 +269,6 @@
       color: #0f172a;
       box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
     }
-
     .modal-qr {
       display: flex;
       justify-content: center;
@@ -313,38 +282,45 @@
 </head>
 <body>
   <div class="container">
-    <!-- Título y estado -->
     <h1 class="title" id="titulo-panel">Panel Docente – CURSO</h1>
-    <div class="subtitle" id="subtitulo-estado">✓ Vinculado en tiempo real • Evaluación del Curso</div>
+    <div class="subtitle" id="connStatus">Conectando con Google Sheets...</div>
 
-    <!-- Botones superiores -->
+    <!-- Barra de configuración rápida si SCRIPT_URL aún no está en el código -->
+    <div id="setupBox" class="setup-box">
+      <span style="font-size:13px; color:#fbbf24; font-weight:700;">⚠ Falta URL /exec de este curso:</span>
+      <input type="text" id="inputScriptUrl" placeholder="Pega aquí https://script.google.com/macros/s/.../exec" />
+      <button type="button" class="btn btn-active" onclick="guardarEndpointManual()">Conectar curso</button>
+    </div>
+
     <div class="toolbar">
-      <button type="button" id="btn-estado-quiz" class="btn btn-active" onclick="alternarEstadoQuiz()">• Quiz ACTIVO (Desactivar)</button>
+      <button type="button" id="btnToggleQuiz" class="btn btn-inactive" onclick="toggleQuiz()">○ Quiz INACTIVO (Activar)</button>
 
-      <select id="sel-intentos" class="select-pill select-purple" onchange="guardarConfig()">
+      <select id="selIntentos" class="select-pill select-purple" onchange="cambiarIntentos()">
         <option value="1">1 Intento máximo</option>
         <option value="2" selected>2 Intentos máximo</option>
-        <option value="3">3 Intentos máximo</option>
-        <option value="0">Intentos ilimitados</option>
       </select>
 
-      <button type="button" id="btn-regla" class="btn btn-orange" onclick="alternarRegla()">Regla: Nota Máxima</button>
-      <button type="button" class="btn btn-blue" onclick="actualizarDatos()">↻ Actualizar</button>
+      <button type="button" id="btnRegla" class="btn btn-orange" onclick="toggleRegla()">Regla: Nota 1.er Intento</button>
+      <button type="button" id="btnRefresh" class="btn btn-blue" onclick="cargarDatos(true)">↻ Actualizar</button>
       <button type="button" class="btn btn-teal" onclick="abrirSheets()">📊 Sheets</button>
       <button type="button" class="btn btn-blue" onclick="exportarExcel()">⬇ Excel (.xls)</button>
       <button type="button" class="btn btn-indigo" onclick="exportarMoodleCSV()">🎓 Exportar Moodle (.csv)</button>
     </div>
 
-    <!-- Duración por pregunta -->
     <div class="duration-bar">
       <div class="duration-controls">
         <span class="duration-title">⏱ Duración por pregunta:</span>
         <label>Fácil:
           <select id="t-facil">
+            <option value="5">5 segundos</option>
             <option value="10" selected>10 segundos</option>
             <option value="15">15 segundos</option>
             <option value="20">20 segundos</option>
             <option value="30">30 segundos</option>
+            <option value="45">45 segundos</option>
+            <option value="60">1 minuto</option>
+            <option value="90">1.5 minutos</option>
+            <option value="120">2 minutos</option>
           </select>
         </label>
         <label>Media:
@@ -354,6 +330,10 @@
             <option value="20">20 segundos</option>
             <option value="30">30 segundos</option>
             <option value="45">45 segundos</option>
+            <option value="60">1 minuto</option>
+            <option value="90">1.5 minutos</option>
+            <option value="120">2 minutos</option>
+            <option value="180">3 minutos</option>
           </select>
         </label>
         <label>Difícil:
@@ -362,38 +342,25 @@
             <option value="20" selected>20 segundos</option>
             <option value="30">30 segundos</option>
             <option value="45">45 segundos</option>
-            <option value="60">60 segundos</option>
+            <option value="60">1 minuto</option>
+            <option value="90">1.5 minutos</option>
+            <option value="120">2 minutos</option>
+            <option value="180">3 minutos</option>
+            <option value="300">5 minutos</option>
           </select>
         </label>
       </div>
       <button type="button" class="btn btn-blue" onclick="aplicarTiempos()">💾 Aplicar Tiempos</button>
     </div>
 
-    <!-- 5 Indicadores -->
     <div class="kpi-grid">
-      <div class="kpi-card">
-        <div class="kpi-label">Ingresaron</div>
-        <div class="kpi-value" id="kpi-ingresaron">0</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Respondiendo ahora</div>
-        <div class="kpi-value" id="kpi-respondiendo">0</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">En 2.° intento</div>
-        <div class="kpi-value" id="kpi-segundo">0</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Finalizados</div>
-        <div class="kpi-value" id="kpi-finalizados">0</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Promedio Nota Máx.</div>
-        <div class="kpi-value" id="kpi-promedio">0.00</div>
-      </div>
+      <div class="kpi-card"><div class="kpi-label">Ingresaron</div><div class="kpi-value" id="kTotal">0</div></div>
+      <div class="kpi-card"><div class="kpi-label">Respondiendo ahora</div><div class="kpi-value" id="kResp">0</div></div>
+      <div class="kpi-card"><div class="kpi-label">En 2.° intento</div><div class="kpi-value" id="kInt2">0</div></div>
+      <div class="kpi-card"><div class="kpi-label">Finalizados</div><div class="kpi-value" id="kFin">0</div></div>
+      <div class="kpi-card"><div class="kpi-label">Promedio Nota Máx.</div><div class="kpi-value" id="kProm">0.00</div></div>
     </div>
 
-    <!-- TOP 15 MEJORES -->
     <h2 class="section-heading">🏆 TOP 15 MEJORES (Mayor nota y menor tiempo)</h2>
     <div class="table-wrap">
       <table id="tabla-top15">
@@ -408,8 +375,8 @@
             <th>Nota Final</th>
           </tr>
         </thead>
-        <tbody id="tbody-top15">
-          <tr><td colspan="7" class="empty-row">Sin registros aún.</td></tr>
+        <tbody id="top15Body">
+          <tr><td colspan="7" class="empty-row">Esperando conexión con Google Sheets...</td></tr>
         </tbody>
       </table>
     </div>
@@ -424,7 +391,7 @@
           <button type="button" class="btn btn-qr-primary" onclick="abrirModalQR()">Ampliar QR (Proyector)</button>
           <button type="button" id="btn-copiar" class="btn btn-qr-light" onclick="copiarEnlace()">Copiar enlace</button>
           <button type="button" class="btn btn-qr-success" onclick="descargarQR()">Descargar QR (PNG)</button>
-          <button type="button" class="btn btn-qr-light" onclick="abrirVistaAlumno()">Abrir vista alumno</button>
+          <button type="button" class="btn btn-qr-light" onclick="abrirVistaAlumno()">Abrir vista alumno (Nueva pestaña)</button>
         </div>
       </div>
       <div id="qr-contenedor" class="qr-box"></div>
@@ -445,18 +412,18 @@
 
   <script>
     // =========================================================================
-    // CONFIGURACIÓN: Pega aquí la URL de tu Web App de Google Apps Script
-    // y el enlace directo a tu Google Sheets (opcional)
+    // PEGA AQUÍ LA URL /exec DE GOOGLE APPS SCRIPT DE ESTE CURSO
+    // (Es la misma URL que tienes en la parte superior del index.html de este curso)
     // =========================================================================
-    const SCRIPT_URL = "";
-    const SHEETS_URL = "";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2I9gMFIf68Giw4rF9yMU5cCgTBA8X8dragxR47-cOm4WEZlkF8wWkYrLc_HdIVuQJ/exec";
 
-    // 1. Detección automática del curso desde la URL de GitHub Pages
+    // Detección automática de la carpeta del curso en GitHub Pages
     const urlExamen = new URL("./", window.location.href).href;
     const segmentos = window.location.pathname.split("/").filter(Boolean);
-    const cursoSlug = segmentos.length >= 2 ? decodeURIComponent(segmentos[segmentos.length - 2]) : "CURSO";
+    const cursoSlug = segmentos.length >= 2 ? decodeURIComponent(segmentos[segmentos.length - 2]) : "sigp";
 
     const nombresCursos = {
+      "quiz-gestion-publica": "SISTEMAS DE INFORMACIÓN PARA LA GESTIÓN PÚBLICA",
       "sigp": "SISTEMAS DE INFORMACIÓN PARA LA GESTIÓN PÚBLICA",
       "atd": "ANÁLISIS DE TOMA DE DECISIONES",
       "tge1": "TALLER DE GENERACIÓN DE EMPRESAS I",
@@ -469,7 +436,29 @@
     document.getElementById("texto-url-curso").textContent = urlExamen;
     document.getElementById("texto-url-modal").textContent = urlExamen;
 
-    // 2. Generación del código QR
+    // Resuelve la URL /exec (código -> localStorage por carpeta)
+    const storageKey = "quiz_script_url_" + cursoSlug.toLowerCase();
+    let ENDPOINT = (SCRIPT_URL && SCRIPT_URL.startsWith("https://"))
+      ? SCRIPT_URL.trim()
+      : (localStorage.getItem(storageKey) || "");
+
+    if (!ENDPOINT) {
+      document.getElementById("setupBox").style.display = "flex";
+    }
+
+    function guardarEndpointManual() {
+      const val = document.getElementById("inputScriptUrl").value.trim();
+      if (!val.startsWith("https://")) {
+        alert("Pega una URL válida que empiece con https://script.google.com/macros/s/.../exec");
+        return;
+      }
+      localStorage.setItem(storageKey, val);
+      ENDPOINT = val;
+      document.getElementById("setupBox").style.display = "none";
+      cargarDatos(true);
+    }
+
+    // Generación del QR del curso
     new QRCode(document.getElementById("qr-contenedor"), {
       text: urlExamen,
       width: 155,
@@ -529,118 +518,193 @@
       a.click();
     }
 
-    // 3. Controles del Panel Docente
-    let quizActivo = true;
-    const reglas = ["Nota Máxima", "Último Intento", "Promedio"];
-    let idxRegla = 0;
-    let registrosActuales = [];
+    // Estado y sincronización en tiempo real con Google Sheets
+    let estadoActivo = false;
+    let reglaActual = "PRIMERO";
+    let sheetUrl = "";
+    let datosCompletos = [];
+    let configSincronizada = false;
 
-    function alternarEstadoQuiz() {
-      quizActivo = !quizActivo;
-      const btn = document.getElementById("btn-estado-quiz");
-      if (quizActivo) {
-        btn.className = "btn btn-active";
-        btn.textContent = "• Quiz ACTIVO (Desactivar)";
-      } else {
-        btn.className = "btn btn-inactive";
-        btn.textContent = "• Quiz INACTIVO (Activar)";
-      }
-      guardarConfig();
-    }
+    const etiquetasRegla = {
+      "PRIMERO": "Regla: Nota 1.er Intento",
+      "MAXIMA": "Regla: Nota Máxima",
+      "ULTIMO": "Regla: Último Intento"
+    };
 
-    function alternarRegla() {
-      idxRegla = (idxRegla + 1) % reglas.length;
-      document.getElementById("btn-regla").textContent = `Regla: ${reglas[idxRegla]}`;
-      guardarConfig();
-    }
-
-    function guardarConfig() {
-      if (!SCRIPT_URL) return;
-      const payload = {
-        action: "config",
-        curso: cursoSlug,
-        activo: quizActivo,
-        intentos: document.getElementById("sel-intentos").value,
-        regla: reglas[idxRegla],
-        tFacil: document.getElementById("t-facil").value,
-        tMedia: document.getElementById("t-media").value,
-        tDificil: document.getElementById("t-dificil").value
-      };
-      fetch(SCRIPT_URL, {
-        method: "POST",
-        mode: "no-cors",
-        body: JSON.stringify(payload)
-      }).catch(() => {});
-    }
-
-    function aplicarTiempos() {
-      guardarConfig();
-      const sub = document.getElementById("subtitulo-estado");
-      sub.textContent = "✓ Tiempos aplicados correctamente • Evaluación del Curso";
-      setTimeout(() => {
-        sub.textContent = "✓ Vinculado en tiempo real • Evaluación del Curso";
-      }, 2500);
-    }
-
-    function abrirSheets() {
-      if (SHEETS_URL) {
-        window.open(SHEETS_URL, "_blank");
-      } else {
-        alert("Configura la constante SHEETS_URL en docente.html para abrir directamente tu hoja de cálculo.");
-      }
-    }
-
-    async function actualizarDatos() {
-      if (!SCRIPT_URL) return;
-      try {
-        const res = await fetch(`${SCRIPT_URL}?curso=${encodeURIComponent(cursoSlug)}`);
-        const data = await res.json();
-        const lista = Array.isArray(data) ? data : (data.resultados || data.rows || []);
-        registrosActuales = lista;
-        renderizarPanel(lista);
-      } catch (e) {
-        console.warn("No se pudo actualizar desde SCRIPT_URL:", e);
-      }
-    }
-
-    function renderizarPanel(lista) {
-      document.getElementById("kpi-ingresaron").textContent = lista.length;
-      const finalizados = lista.filter(r => r.nota !== undefined && r.nota !== "");
-      document.getElementById("kpi-finalizados").textContent = finalizados.length;
-      document.getElementById("kpi-respondiendo").textContent = Math.max(0, lista.length - finalizados.length);
-      document.getElementById("kpi-segundo").textContent = lista.filter(r => Number(r.intento) === 2).length;
-
-      if (finalizados.length > 0) {
-        const suma = finalizados.reduce((acc, r) => acc + Number(r.nota || 0), 0);
-        document.getElementById("kpi-promedio").textContent = (suma / finalizados.length).toFixed(2);
-      }
-
-      const top15 = [...finalizados]
-        .sort((a, b) => Number(b.nota) - Number(a.nota) || Number(a.tiempo || 9999) - Number(b.tiempo || 9999))
-        .slice(0, 15);
-
-      const tbody = document.getElementById("tbody-top15");
-      if (!top15.length) {
-        tbody.innerHTML = '<tr><td colspan="7" class="empty-row">Sin registros aún.</td></tr>';
+    function pintarUI(res) {
+      if (res && res.ok === false && res.error) {
+        const statusEl = document.getElementById("connStatus");
+        statusEl.textContent = "⚠ Error en Apps Script: " + res.error;
+        statusEl.style.color = "#f87171";
         return;
       }
 
-      tbody.innerHTML = top15.map((r, i) => `
-        <tr>
-          <td>${i + 1}</td>
-          <td>${r.dni || r.codigo || "-"}</td>
-          <td>${r.estudiante || r.nombre || "-"}</td>
-          <td>${r.aciertos ?? "-"}</td>
-          <td>${r.desaciertos ?? "-"}</td>
-          <td>${r.tiempo ?? "-"}</td>
-          <td><strong>${Number(r.nota).toFixed(2)}</strong></td>
-        </tr>
-      `).join("");
+      estadoActivo = Boolean(res.activo);
+      reglaActual = String(res.regla || "PRIMERO").toUpperCase();
+      sheetUrl = res.sheetUrl || sheetUrl;
+      datosCompletos = res.todos || [];
+
+      const statusEl = document.getElementById("connStatus");
+      statusEl.textContent = "✓ Vinculado en tiempo real • Evaluación del Curso";
+      statusEl.style.color = "#4ade80";
+
+      const bQuiz = document.getElementById("btnToggleQuiz");
+      bQuiz.disabled = false;
+      bQuiz.className = estadoActivo ? "btn btn-active" : "btn btn-inactive";
+      bQuiz.textContent = estadoActivo ? "● Quiz ACTIVO (Desactivar)" : "○ Quiz INACTIVO (Activar)";
+
+      const bRegla = document.getElementById("btnRegla");
+      bRegla.disabled = false;
+      bRegla.textContent = etiquetasRegla[reglaActual] || "Regla: Nota Máxima";
+
+      // Sincroniza selector de intentos y tiempos la primera vez sin interrumpir ediciones
+      if (!configSincronizada) {
+        if (res.intentos) {
+          document.getElementById("selIntentos").value = String(res.intentos);
+        }
+        if (res.tiempos) {
+          if (res.tiempos.basico) document.getElementById("t-facil").value = String(res.tiempos.basico);
+          if (res.tiempos.intermedio) document.getElementById("t-media").value = String(res.tiempos.intermedio);
+          if (res.tiempos.avanzado) document.getElementById("t-dificil").value = String(res.tiempos.avanzado);
+        }
+        configSincronizada = true;
+      }
+
+      if (res.stats) {
+        document.getElementById("kTotal").textContent = res.stats.totalIngresados ?? 0;
+        document.getElementById("kResp").textContent = res.stats.respondiendo ?? 0;
+        document.getElementById("kInt2").textContent = res.stats.enSegundoIntento ?? 0;
+        document.getElementById("kFin").textContent = res.stats.finalizados ?? 0;
+      }
+      if (res.promedioNotaMax !== undefined) {
+        document.getElementById("kProm").textContent = res.promedioNotaMax;
+      }
+
+      const tb = document.getElementById("top15Body");
+      const listaTop = res.top15 || [];
+      if (!listaTop.length) {
+        tb.innerHTML = '<tr><td colspan="7" class="empty-row">Aún no hay estudiantes registrados en esta hoja.</td></tr>';
+        return;
+      }
+
+      tb.innerHTML = listaTop.map((s, i) => {
+        const aciertos = s.aciertos !== undefined ? s.aciertos : Math.max(0, 20 - Number(s.desaciertos || 0));
+        const desaciertos = s.desaciertos !== undefined ? s.desaciertos : Math.max(0, 20 - Number(aciertos));
+        const enVivo = String(s.estado || "").startsWith("Respondiendo")
+          ? '<span class="badge-live">En curso</span>'
+          : "";
+        return `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${s.dni}</td>
+            <td>${s.nombre}${enVivo}</td>
+            <td>${aciertos}</td>
+            <td style="color:#f87171; font-weight:700;">${desaciertos}</td>
+            <td>${s.tiempo}s</td>
+            <td><strong>${s.nota}</strong></td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    async function cargarDatos(manual = false) {
+      const statusEl = document.getElementById("connStatus");
+      if (!ENDPOINT) {
+        statusEl.textContent = "⚠ Configura la URL /exec arriba para conectar este curso";
+        statusEl.style.color = "#fbbf24";
+        return;
+      }
+      const btnRef = document.getElementById("btnRefresh");
+      if (manual) {
+        btnRef.disabled = true;
+        btnRef.textContent = "↻ Sincronizando...";
+      }
+      try {
+        const res = await fetch(`${ENDPOINT}?action=teacher&t=${Date.now()}`).then(r => r.json());
+        pintarUI(res);
+      } catch (e) {
+        statusEl.textContent = "⚠ Error de conexión con Google Sheets: " + e.message;
+        statusEl.style.color = "#f87171";
+      } finally {
+        if (manual) {
+          btnRef.disabled = false;
+          btnRef.textContent = "↻ Actualizar";
+        }
+      }
+    }
+
+    async function toggleQuiz() {
+      if (!ENDPOINT) return;
+      const bQuiz = document.getElementById("btnToggleQuiz");
+      bQuiz.disabled = true;
+      bQuiz.textContent = "Actualizando estado...";
+      try {
+        const res = await fetch(`${ENDPOINT}?action=setConfig&clave=activo&valor=${!estadoActivo}&t=${Date.now()}`).then(r => r.json());
+        pintarUI(res);
+      } catch (e) {
+        bQuiz.disabled = false;
+        alert("No se pudo cambiar el estado en Google Sheets: " + e.message);
+      }
+    }
+
+    async function toggleRegla() {
+      if (!ENDPOINT) return;
+      const bRegla = document.getElementById("btnRegla");
+      bRegla.disabled = true;
+      bRegla.textContent = "Cambiando regla...";
+      const orden = ["PRIMERO", "MAXIMA", "ULTIMO"];
+      const siguiente = orden[(orden.indexOf(reglaActual) + 1) % orden.length];
+      try {
+        const res = await fetch(`${ENDPOINT}?action=setConfig&clave=regla&valor=${siguiente}&t=${Date.now()}`).then(r => r.json());
+        pintarUI(res);
+      } catch (e) {
+        bRegla.disabled = false;
+        alert("No se pudo cambiar la regla: " + e.message);
+      }
+    }
+
+    async function cambiarIntentos() {
+      if (!ENDPOINT) return;
+      const val = document.getElementById("selIntentos").value;
+      try {
+        const res = await fetch(`${ENDPOINT}?action=setConfig&clave=intentos&valor=${val}&t=${Date.now()}`).then(r => r.json());
+        pintarUI(res);
+      } catch (e) {
+        alert("No se pudo actualizar el número de intentos: " + e.message);
+      }
+    }
+
+    async function aplicarTiempos() {
+      if (!ENDPOINT) return;
+      const basico = document.getElementById("t-facil").value;
+      const intermedio = document.getElementById("t-media").value;
+      const avanzado = document.getElementById("t-dificil").value;
+      try {
+        const url = `${ENDPOINT}?action=setTiempos&basico=${basico}&intermedio=${intermedio}&avanzado=${avanzado}&t=${Date.now()}`;
+        const res = await fetch(url).then(r => r.json());
+        pintarUI(res);
+        const statusEl = document.getElementById("connStatus");
+        statusEl.textContent = `✓ Tiempos aplicados (${basico}s / ${intermedio}s / ${avanzado}s) • Evaluación del Curso`;
+        statusEl.style.color = "#4ade80";
+      } catch (e) {
+        alert("No se pudieron aplicar los tiempos: " + e.message);
+      }
+    }
+
+    function abrirSheets() {
+      if (sheetUrl) {
+        window.open(sheetUrl, "_blank");
+      } else {
+        alert("Espera un segundo a que aparezca arriba en verde '✓ Vinculado en tiempo real' para abrir tu hoja de cálculo.");
+      }
     }
 
     function exportarExcel() {
-      const tabla = document.getElementById("tabla-top15").outerHTML;
-      const blob = new Blob(["\ufeff" + tabla], { type: "application/vnd.ms-excel;charset=utf-8;" });
+      let csv = "DNI_Codigo,Nombres_Apellidos,Detalle_Intentos,Aciertos,Desaciertos,Tiempo_Seg,Nota_Final,Estado\n";
+      datosCompletos.forEach(r => {
+        csv += `"${r.dni}","${r.nombre}","${r.intentosTxt || ""}",${r.aciertos ?? ""},${r.desaciertos ?? ""},${r.tiempo ?? ""},${r.nota ?? ""},"${r.estado ?? ""}"\n`;
+      });
+      const blob = new Blob(["\ufeff" + csv], { type: "application/vnd.ms-excel;charset=utf-8;" });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
       a.download = `Notas_${cursoSlug}.xls`;
@@ -648,11 +712,10 @@
     }
 
     function exportarMoodleCSV() {
-      const filas = [["DNI / Codigo", "Estudiante", "Nota Final"]];
-      registrosActuales.forEach(r => {
-        filas.push([r.dni || r.codigo || "", r.estudiante || r.nombre || "", r.nota ?? ""]);
+      let csv = "DNI_Codigo,Nombres_Apellidos,Nota_Final\n";
+      datosCompletos.forEach(r => {
+        csv += `"${r.dni}","${r.nombre}",${r.nota ?? ""}\n`;
       });
-      const csv = filas.map(f => f.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
       const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
@@ -660,7 +723,8 @@
       a.click();
     }
 
-    actualizarDatos();
+    setInterval(() => cargarDatos(false), 4000);
+    cargarDatos(false);
   </script>
 </body>
 </html>
