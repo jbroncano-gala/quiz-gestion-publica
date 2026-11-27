@@ -3,306 +3,429 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Evaluación del Curso – Vista Estudiante</title>
+  <title>Quiz – Taller de Generación de Empresas I</title>
   <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: #f1f5f9;
-      margin: 0;
-      padding: 16px;
-      color: #1e293b;
-    }
-    .card {
-      max-width: 700px;
-      margin: 0 auto;
-      background: #ffffff;
-      border-radius: 14px;
-      padding: 24px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    }
-    .status-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 14px;
-      border-radius: 999px;
-      font-weight: 700;
-      font-size: 13.5px;
-      white-space: nowrap;
-    }
-    .dot { width: 11px; height: 11px; border-radius: 50%; }
-    .online { background: #dcfce7; color: #166534; }
-    .online .dot { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
-    .offline { background: #fee2e2; color: #991b1b; }
-    .offline .dot { background: #ef4444; }
-
-    label { font-weight: 600; font-size: 14px; color: #334155; }
-    input {
-      width: 100%;
-      padding: 12px;
-      margin: 6px 0 14px;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      font-size: 16px;
-    }
-    button {
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 10px;
-      background: #1d4ed8;
-      color: #ffffff;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.15s ease;
-    }
+    * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+    input { user-select: text; -webkit-user-select: text; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f1f5f9; margin: 0; padding: 16px; color: #1e293b; }
+    .card { max-width: 720px; margin: 0 auto; background: #fff; border-radius: 14px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    .status-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 10px; flex-wrap: wrap; }
+    .badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; font-weight: 700; font-size: 13px; white-space: nowrap; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .online { background: #dcfce7; color: #166534; } .online .dot { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+    .offline { background: #fee2e2; color: #991b1b; } .offline .dot { background: #ef4444; }
+    input { width: 100%; padding: 12px; margin: 6px 0 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 16px; }
+    button { width: 100%; padding: 14px; border: none; border-radius: 10px; background: #1d4ed8; color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.15s; }
     button:hover:not(:disabled) { background: #1e40af; }
     button:disabled { background: #94a3b8; cursor: not-allowed; }
-    .btn-retry {
-      background: #059669;
-      margin-top: 14px;
-    }
-    .btn-retry:hover:not(:disabled) { background: #047857; }
-
-    .info-box {
-      background: #eff6ff;
-      border-left: 4px solid #2563eb;
-      padding: 12px 16px;
-      border-radius: 8px;
-      font-size: 14px;
-      margin-bottom: 16px;
-      line-height: 1.55;
-    }
-
-    /* Protección anti-selección y anti-copia durante el examen */
-    .quiz-protected {
-      user-select: none;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-    }
-    .no-pointer-text { pointer-events: none; }
-
-    .q-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      padding: 10px 14px;
-      border-radius: 10px;
-      margin-bottom: 14px;
-      gap: 8px;
-    }
-    .timer {
-      font-size: 19px;
-      font-weight: 800;
-      color: #dc2626;
-      white-space: nowrap;
-    }
-    #qText {
-      font-size: 17px;
-      line-height: 1.45;
-      margin: 0 0 14px 0;
-      color: #0f172a;
-    }
-    .opt {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      padding: 12px 14px;
-      margin: 9px 0;
-      border: 2px solid #e2e8f0;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: 0.15s;
-      background: #ffffff;
-      font-size: 15px;
-      line-height: 1.4;
-    }
+    .btn-next { background: #0f172a; }
+    .btn-next:hover:not(:disabled) { background: #1e293b; }
+    .btn-secondary { background: #0f766e; margin-top: 14px; }
+    .btn-secondary:hover:not(:disabled) { background: #115e59; }
+    .info-box { background: #eff6ff; border-left: 4px solid #2563eb; padding: 12px 16px; border-radius: 8px; font-size: 14px; margin-bottom: 16px; line-height: 1.5; }
+    .opt { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; margin: 9px 0; border: 2px solid #e2e8f0; border-radius: 10px; cursor: pointer; transition: 0.15s; font-size: 15px; line-height: 1.4; font-weight: 500; }
     .opt:hover { border-color: #93c5fd; background: #f8fafc; }
     .opt.selected { border-color: #2563eb; background: #eff6ff; font-weight: 600; }
-    .opt.correct-fb { border-color: #16a34a !important; background: #dcfce7 !important; color: #14532d; font-weight: 700; }
-    .opt.wrong-fb { border-color: #dc2626 !important; background: #fee2e2 !important; color: #7f1d1d; font-weight: 700; }
-
+    .opt.correct-box { border-color: #16a34a !important; background: #dcfce7 !important; color: #14532d; font-weight: 700; }
+    .opt.wrong-box { border-color: #dc2626 !important; background: #fee2e2 !important; color: #7f1d1d; font-weight: 700; }
+    .opt-tag { font-size: 12px; font-weight: 800; white-space: nowrap; }
+    .feedback-banner { padding: 12px 16px; border-radius: 10px; margin-top: 14px; font-size: 14px; font-weight: 600; line-height: 1.45; }
+    .fb-ok { background: #dcfce7; border: 1px solid #86efac; color: #166534; }
+    .fb-err { background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; }
+    .timer { font-size: 20px; font-weight: 800; color: #dc2626; background: #fef2f2; padding: 4px 12px; border-radius: 8px; border: 1px solid #fecaca; }
     .hidden { display: none !important; }
-    .metric-box {
-      background: #f8fafc;
-      border: 1px solid #cbd5e1;
-      border-radius: 12px;
-      padding: 18px;
-      text-align: center;
-      margin-top: 14px;
-    }
-    .score-summary {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-top: 14px;
-    }
-    .score-pill {
-      background: #f1f5f9;
-      border-radius: 10px;
-      padding: 12px 8px;
-      text-align: center;
-    }
-
-    /* Escudo negro si intenta cambiar de pestaña o capturar */
-    #privacyShield {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: #0f172a;
-      color: #f8fafc;
-      z-index: 99999;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 24px;
-      font-size: 18px;
-      font-weight: 700;
-    }
+    .metric-box { background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 12px; padding: 24px; text-align: center; margin-top: 16px; }
+    .shield-warn { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.96); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; z-index: 9999; }
   </style>
 </head>
-<body oncontextmenu="return false;" ondragstart="return false;">
-  <div id="privacyShield">
-    <div>
-      ⚠ Pantalla protegida durante la evaluación.<br>
-      <span style="font-size:14px; font-weight:400; color:#94a3b8;">Vuelve a esta ventana para continuar respondiendo.</span>
-    </div>
+<body>
+  <div id="shieldOverlay" class="shield-warn hidden">
+    <h2 style="color:#f87171;">⚠️ Protección de Evaluación Activa</h2>
+    <p style="max-width:460px;">Se detectó salida de pantalla o intento de captura/copia. Mantente dentro de la evaluación para continuar.</p>
+    <button onclick="document.getElementById('shieldOverlay').classList.add('hidden')" style="max-width:260px; margin-top:16px;">Volver al Examen</button>
   </div>
 
   <div class="card">
     <div class="status-bar">
-      <strong id="courseHeader">Evaluación del Curso</strong>
-      <span id="statusBadge" class="badge offline"><span class="dot"></span><span id="statusText">Verificando...</span></span>
+      <strong>UNASAM – Taller de Generación de Empresas I</strong>
+      <span id="statusBadge" class="badge offline"><span class="dot"></span><span id="statusText">Conectando...</span></span>
     </div>
 
-    <!-- PANTALLA INICIO -->
+    <!-- PANTALLA DE INGRESO -->
     <div id="viewLogin">
-      <h2 style="margin-top:0;">Ingreso a la Evaluación</h2>
+      <h2 style="margin-top:0;">Evaluación: Taller de Generación de Empresas I</h2>
       <div class="info-box">
         <strong>Indicaciones importantes:</strong><br>
         • Ingresa tu <strong>Código de estudiante o DNI</strong> y tus <strong>Nombres y Apellidos completos</strong>.<br>
-        • Intentos permitidos: <strong id="infoIntentos">2 intentos</strong> (en cada intento las preguntas y alternativas cambian de orden).<br>
-        • Duración por pregunta: <strong id="infoTiempos">Fácil: 10 s | Media: 15 s | Difícil: 20 s</strong>.
+        • Dispones de hasta <strong><span id="lblMaxIntentos">2</span> intento(s)</strong> según lo configurado por el docente.<br>
+        • Tiempos por nivel: <strong>Básico: <span id="lblTB">10</span> s</strong> | <strong>Intermedio: <span id="lblTI">15</span> s</strong> | <strong>Avanzado: <span id="lblTA">20</span> s</strong>.<br>
+        • Las preguntas y alternativas se presentan en <strong>orden aleatorio</strong> en cada intento.
       </div>
-      <label for="dni">Código de estudiante o DNI</label>
-      <input type="text" id="dni" placeholder="Ej. 20211234 o 45678912" autocomplete="off" />
-      <label for="nombre">Nombres y Apellidos completos</label>
+      <label for="dni"><strong>Código de estudiante o DNI</strong></label>
+      <input type="text" id="dni" placeholder="Ej. 20191234 o 45678912" autocomplete="off" />
+      <label for="nombre"><strong>Nombres y Apellidos completos</strong></label>
       <input type="text" id="nombre" placeholder="Ej. Juan Carlos Pérez López" autocomplete="off" />
-      <button id="btnIniciar" onclick="iniciarQuiz(false)" disabled>Esperando activación del docente...</button>
+      <button id="btnIniciar" onclick="iniciarQuiz()" disabled>Esperando activación del docente...</button>
       <p id="loginMsg" style="color:#dc2626; font-weight:600; margin-top:10px;"></p>
     </div>
 
-    <!-- PANTALLA QUIZ -->
-    <div id="viewQuiz" class="hidden quiz-protected">
-      <div class="q-header">
-        <span id="qMeta" style="font-weight:700; font-size:13.5px; color:#334155;"></span>
-        <span class="timer">⏱ <span id="qTimer">0s</span></span>
+    <!-- PANTALLA DE EVALUACIÓN -->
+    <div id="viewQuiz" class="hidden">
+      <div class="status-bar">
+        <span id="qMeta" style="font-weight:700; color:#334155; font-size:14px;"></span>
+        <span class="timer">⏱ <span id="qTimer">0</span>s</span>
       </div>
-      <h3 id="qText" class="no-pointer-text"></h3>
+      <h3 id="qText" style="line-height:1.45; margin-bottom:14px;"></h3>
       <div id="qOptions"></div>
-      <button id="btnConfirmar" onclick="confirmarYAvanzar()" style="margin-top:14px;">Confirmar y Siguiente</button>
+      <div id="qFeedback" class="feedback-banner hidden"></div>
+      <button id="btnConfirmar" onclick="verificarRespuesta(false)" style="margin-top:16px;">Confirmar respuesta</button>
+      <button id="btnSiguiente" onclick="avanzarPregunta()" class="btn-next hidden" style="margin-top:16px;">Siguiente pregunta →</button>
     </div>
 
-    <!-- PANTALLA FINAL -->
+    <!-- PANTALLA FINAL (NOTA DECIMAL 0.00 Y FORMATO 20/20) -->
     <div id="viewEnd" class="hidden">
-      <h2 style="margin-top:0; color:#166534;">¡Evaluación Finalizada!</h2>
-      <p id="endStudentMsg" style="font-weight:600; color:#334155;"></p>
-
-      <div class="score-summary">
-        <div class="score-pill">
-          <div style="font-size:12px; color:#64748b;">Tu Nota</div>
-          <div id="endNota" style="font-size:24px; font-weight:800; color:#1d4ed8;">0.00</div>
-        </div>
-        <div class="score-pill">
-          <div style="font-size:12px; color:#64748b;">Aciertos</div>
-          <div id="endAciertos" style="font-size:24px; font-weight:800; color:#16a34a;">0</div>
-        </div>
-        <div class="score-pill">
-          <div style="font-size:12px; color:#64748b;">Desaciertos</div>
-          <div id="endDesaciertos" style="font-size:24px; font-weight:800; color:#dc2626;">0</div>
-        </div>
-      </div>
-
+      <h2 style="text-align:center; margin-top:0; margin-bottom:6px; color:#166534;">¡Evaluación Finalizada!</h2>
+      <p id="endStudentMsg" style="text-align:center; color:#475569; margin-top:0;"></p>
       <div class="metric-box">
-        <div style="font-size:13.5px; color:#64748b;">Promedio General de la Nota Máxima del Curso</div>
-        <div id="avgMaxDisplay" style="font-size:34px; font-weight:800; color:#1d4ed8; margin-top:4px;">--</div>
+        <div style="font-size:15px; color:#64748b; font-weight:600;">Nota Obtenida</div>
+        <div id="finalNotaDecimal" style="font-size:48px; font-weight:800; color:#1d4ed8; margin:6px 0;">0.00</div>
+        <div id="finalAciertosFrac" style="font-size:22px; font-weight:700; color:#0f172a;">0/20</div>
       </div>
-
-      <!-- Botón directo al 2.° intento cuando está habilitado -->
-      <button id="btnSegundoIntento" class="btn-retry hidden" onclick="iniciarQuiz(true)">
-        Iniciar 2.° Intento (Preguntas y alternativas mezcladas) →
-      </button>
-      <p id="endFinalNotice" style="font-size:13px; color:#64748b; text-align:center; margin-top:12px;"></p>
+      <button id="btnSegundoIntento" class="btn-secondary hidden" onclick="iniciarSegundoIntento()">Realizar 2.° Intento Ahora</button>
     </div>
   </div>
 
   <script>
-    // =========================================================================
-    // 1. URL DE GOOGLE APPS SCRIPT DEL CURSO
-    // =========================================================================
+    // PEGA AQUÍ LA URL /exec DE LA HOJA DE GOOGLE SHEETS DE TALLER DE GENERACIÓN DE EMPRESAS I
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2I9gMFIf68Giw4rF9yMU5cCgTBA8X8dragxR47-cOm4WEZlkF8wWkYrLc_HdIVuQJ/exec";
 
-    // =========================================================================
-    // 2. BANCO DE PREGUNTAS DEL CURSO (Se barajan en cada intento)
-    // =========================================================================
+    // BANCO DE 20 PREGUNTAS AUTOCONTENIDO – TALLER DE GENERACIÓN DE EMPRESAS I
     const PREGUNTAS = [
-      { id: 1, nivel: "Básico", tiempo: 10, bloom: "Recordar", texto: "Según Laudon & Laudon, un SI integra personas, procesos, datos y tecnología. ¿Qué plataforma del MEF integra presupuesto, tesorería, contabilidad y endeudamiento?", opciones: ["SIGA", "SIAF", "SEACE", "PLAME", "INVIERTE.PE"], correctas: [1] },
-      { id: 2, nivel: "Básico", tiempo: 10, bloom: "Recordar", texto: "¿Qué organismo administra actualmente el SEACE y la plataforma PLADICOP bajo la Ley 32069?", opciones: ["MEF", "SUNAT", "OECE", "PCM", "SBN"], correctas: [2] },
-      { id: 3, nivel: "Básico", tiempo: 10, bloom: "Recordar", texto: "¿Qué norma establece el marco legal de la Ley de Gobierno Digital en el Perú?", opciones: ["DL 1439", "Ley 32069", "DL 1412", "DL 1252", "Ley 32513"], correctas: [2] },
-      { id: 4, nivel: "Básico", tiempo: 10, bloom: "Recordar", texto: "¿Cuáles de los siguientes módulos pertenecen al SIGA? (Selecciona 3)", opciones: ["Logística", "Almacén", "Patrimonio", "Endeudamiento Público", "PLAME"], correctas: [0, 1, 2] },
-      { id: 5, nivel: "Básico", tiempo: 10, bloom: "Comprender", texto: "En la Consulta Amigable del MEF, ¿cómo se calcula el avance de ejecución presupuestal?", opciones: ["Certificado ÷ PIA", "Compromiso ÷ PIM", "Devengado ÷ PIM", "Girado ÷ PIA", "Pagado ÷ Certificado"], correctas: [2] },
-      { id: 6, nivel: "Básico", tiempo: 10, bloom: "Recordar", texto: "¿Qué entidades administran T-Registro/PLAME e INVIERTE.PE respectivamente? (Selecciona 2)", opciones: ["SUNAT (T-Registro/PLAME)", "MEF - DGPMI (INVIERTE.PE)", "OECE (INVIERTE.PE)", "PCM (PLAME)", "Contraloría (T-Registro)"], correctas: [0, 1] },
-      { id: 7, nivel: "Intermedio", tiempo: 15, bloom: "Comprender", texto: "Caso Bono Familiar Universal (S/ 579 180 de perjuicio): ¿qué fallas de datos detectó la Contraloría? (Selecciona 2)", opciones: ["Carga parcialmente manual del padrón", "Falta de configuración y validación del software", "Exceso de interoperabilidad PIDE", "Uso del catálogo SIGA", "Cierre del año fiscal"], correctas: [0, 1] },
-      { id: 8, nivel: "Intermedio", tiempo: 15, bloom: "Comprender", texto: "¿Cuáles son los módulos que conforman el SIAF Web? (Selecciona 3)", opciones: ["MPP (Presupuestario)", "MAD (Administrativo)", "MADAF (Autorizaciones)", "PAC (Plan Anual)", "SBN (Patrimonio)"], correctas: [0, 1, 2] },
-      { id: 9, nivel: "Intermedio", tiempo: 15, bloom: "Aplicar", texto: "Caso Universidad Pública: surge una compra urgente de software no prevista. ¿Qué debe hacerse antes de convocar? (Selecciona 2)", opciones: ["Modificar el PAC con sustento", "Registrar la modificación en SEACE/PLADICOP", "Emitir el devengado directo en SIAF", "Dar de baja en SIGA", "Omitir requerimiento"], correctas: [0, 1] },
-      { id: 10, nivel: "Intermedio", tiempo: 15, bloom: "Aplicar", texto: "En el SIAF, ¿qué requisitos son obligatorios para registrar el Devengado sin observaciones de control? (Selecciona 2)", opciones: ["Conformidad del área usuaria o almacén", "Comprobante de pago sustentatorio", "Publicación en El Peruano", "Pago bancario previo", "Aprobación del Tribunal"], correctas: [0, 1] },
-      { id: 11, nivel: "Intermedio", tiempo: 15, bloom: "Comprender", texto: "¿Qué afirmaciones describen correctamente a la PIDE? (Selecciona 2)", opciones: ["Permite consumir servicios de información entre entidades", "La administra la SGTD de la PCM", "Es una base de datos central única", "Reemplaza al SIAF", "Comparte datos sin control de acceso"], correctas: [0, 1] },
-      { id: 12, nivel: "Intermedio", tiempo: 15, bloom: "Recordar", texto: "¿Cuáles son las tres etapas de la Cadena de Abastecimiento Público (DL 1439)? (Selecciona 3)", opciones: ["Programación", "Adquisición", "Administración", "Endeudamiento", "Liquidación tributaria"], correctas: [0, 1, 2] },
-      { id: 13, nivel: "Intermedio", tiempo: 15, bloom: "Aplicar", texto: "Un municipio exige un documento que otra entidad ya posee. ¿Qué norma prohíbe esto si hay interoperabilidad?", opciones: ["Ley 32069", "Decreto Legislativo N.° 1246", "DL 1440", "DS 217-2019-EF", "Ley 29158"], correctas: [1] },
-      { id: 14, nivel: "Intermedio", tiempo: 15, bloom: "Comprender", texto: "¿Qué relación existe entre el SIGA y el SIAF en el flujo del gasto? (Selecciona 2)", opciones: ["El SIGA alimenta al SIAF con información logística", "La orden de compra se vincula con certificación y compromiso SIAF", "El SIGA reemplaza al SIAF en pagos", "El SIAF controla existencias físicas", "No comparten clasificadores"], correctas: [0, 1] },
-      { id: 15, nivel: "Intermedio", tiempo: 15, bloom: "Comprender", texto: "¿Qué fases de la contratación pública se registran obligatoriamente en SEACE/PLADICOP? (Selecciona 3)", opciones: ["Actos preparatorios", "Selección", "Ejecución contractual", "Planilla mensual", "Evaluación del PIA"], correctas: [0, 1, 2] },
-      { id: 16, nivel: "Intermedio", tiempo: 15, bloom: "Aplicar", texto: "Caso Hospital Víctor Ramos Guardia (Huaraz, S/ 43 920): ¿qué medidas evitan pagos irregulares de bonos? (Selecciona 2)", opciones: ["Integrar registros de personal, asistencia y planillas", "Validar requisitos de elegibilidad y aprobaciones", "Eliminar controles posteriores", "Usar hojas Excel aisladas", "Desactivar tesorería"], correctas: [0, 1] },
-      { id: 17, nivel: "Avanzado", tiempo: 20, bloom: "Analizar", texto: "Caso SISFOH (86 000 hogares mal clasificados): ¿qué impacto directo genera en la gestión pública? (Selecciona 2)", opciones: ["Pérdida de precisión en focalización social", "Asignación ineficiente de recursos y políticas desalineadas", "Aumento automático del PIA", "Mayor velocidad de girado", "Fin de la interoperabilidad"], correctas: [0, 1] },
-      { id: 18, nivel: "Avanzado", tiempo: 20, bloom: "Analizar", texto: "Caso Municipalidad de Áncash (padrones en Excel y demoras): ¿qué arquitectura resuelve las causas raíz? (Selecciona 3)", opciones: ["Depurar base y validar DNI con interoperabilidad", "Automatizar alertas y seguimiento de reclamos", "Gobernanza de datos con indicadores de duplicidad", "Comprar PCs rápidas manteniendo Excel", "Restringir reclamos ciudadanos"], correctas: [0, 1, 2] },
-      { id: 19, nivel: "Avanzado", tiempo: 20, bloom: "Analizar", texto: "¿Qué secuencia lógica entre POI, PIA y PAC garantiza el alineamiento y legalidad del gasto?", opciones: ["PAC define metas → PIA elige proveedores → POI paga", "POI define qué se hará → PIA asegura recursos → PAC organiza contrataciones", "PIA define necesidades → PAC aprueba presupuesto → POI ejecuta", "PAC reemplaza al POI", "Operan independientemente"], correctas: [1] },
-      { id: 20, nivel: "Avanzado", tiempo: 20, bloom: "Analizar", texto: "Ante filtraciones (RENIEC 2025, PNP, Telegram 2026), ¿qué equilibrio exige un SI público moderno? (Selecciona 2)", opciones: ["Interoperabilidad con controles de acceso y trazabilidad", "Finalidad legítima y seguridad supervisada por la ANPD", "Bloquear todo intercambio de datos", "Ignorar protección de datos por eficiencia", "Publicar padrones completos en web"], correctas: [0, 1] }
+      // ================= NIVEL BÁSICO (Preguntas 1 a 6) =================
+      {
+        id: 1,
+        nivel: "Básico",
+        bloom: "Recordar",
+        texto: "En la formulación de objetivos empresariales bajo la metodología SMART, ¿qué significan sus siglas en español? (Marque las alternativas correctas)",
+        opciones: [
+          "Específico y Medible",
+          "Alcanzable y Relevante",
+          "Acotado en el tiempo",
+          "Subjetivo y Marginal",
+          "Automático y Rotativo"
+        ],
+        correctas: [0, 1, 2]
+      },
+      {
+        id: 2,
+        nivel: "Básico",
+        bloom: "Comprender",
+        texto: "¿Qué elemento del plan estratégico representa la 'razón de ser' del negocio y define quiénes somos, la necesidad a satisfacer, los clientes a alcanzar y los productos o servicios a ofertar? (Marque la respuesta correcta)",
+        opciones: [
+          "La misión",
+          "La visión",
+          "El flujograma",
+          "El organigrama",
+          "El benchmarking"
+        ],
+        correctas: [0]
+      },
+      {
+        id: 3,
+        nivel: "Básico",
+        bloom: "Recordar",
+        texto: "En el diseño de la estructura organizacional, ¿cuáles de los siguientes forman parte de los componentes básicos de una organización? (Marque las alternativas correctas)",
+        opciones: [
+          "Ápice estratégico",
+          "Línea media",
+          "Núcleo operativo",
+          "Matriz de Ansoff",
+          "Mezcla promocional"
+        ],
+        correctas: [0, 1, 2]
+      },
+      {
+        id: 4,
+        nivel: "Básico",
+        bloom: "Recordar",
+        texto: "¿Qué tipo de estructura organizacional se caracteriza por ser 'plana', carecer de divisiones departamentales complejas y concentrar generalmente toda la autoridad en el propietario-director de una micro o pequeña empresa? (Marque la respuesta correcta)",
+        opciones: [
+          "Estructura simple",
+          "Estructura matricial",
+          "Burocracia profesional",
+          "Forma divisional",
+          "Estructura en red"
+        ],
+        correctas: [0]
+      },
+      {
+        id: 5,
+        nivel: "Básico",
+        bloom: "Recordar",
+        texto: "Cuando se diseña la mezcla de marketing para servicios o bienes intangibles, además de las 4 'P' tradicionales (Producto, Precio, Plaza y Promoción), ¿qué tres variables adicionales se incorporan? (Marque las alternativas correctas)",
+        opciones: [
+          "Personal",
+          "Procesos",
+          "Proactividad",
+          "Patentes",
+          "Presupuesto"
+        ],
+        correctas: [0, 1, 2]
+      },
+      {
+        id: 6,
+        nivel: "Básico",
+        bloom: "Recordar",
+        texto: "En la definición de objetivos y estrategias funcionales del plan de operaciones, ¿cuáles son los cuatro aspectos clave sobre los que se desarrollan dichos objetivos? (Marque las alternativas correctas)",
+        opciones: [
+          "Costos y calidad",
+          "Flexibilidad y tiempos de entrega",
+          "Publicidad y relaciones públicas",
+          "Reclutamiento y selección",
+          "Segmentación y posicionamiento"
+        ],
+        correctas: [0, 1]
+      },
+
+      // ================= NIVEL INTERMEDIO (Preguntas 7 a 16) =================
+      {
+        id: 7,
+        nivel: "Intermedio",
+        bloom: "Comprender",
+        texto: "Según Michael Porter, ¿cuáles son las tres estrategias competitivas genéricas que puede asumir una empresa para crear una posición defendible dentro de una industria? (Marque las alternativas correctas)",
+        opciones: [
+          "Liderazgo en costos",
+          "Diferenciación",
+          "Enfoque",
+          "Penetración de mercado",
+          "Cosecha"
+        ],
+        correctas: [0, 1, 2]
+      },
+      {
+        id: 8,
+        nivel: "Intermedio",
+        bloom: "Comprender",
+        texto: "Las políticas empresariales son normas específicas o marcos de acción dentro de los cuales se desarrolla la estrategia. ¿Cuáles son sus tres características fundamentales? (Marque las alternativas correctas)",
+        opciones: [
+          "Consistencia",
+          "Flexibilidad",
+          "Claridad",
+          "Secretismo",
+          "Rigidez absoluta"
+        ],
+        correctas: [0, 1, 2]
+      },
+      {
+        id: 9,
+        nivel: "Intermedio",
+        bloom: "Comprender",
+        texto: "De acuerdo con el modelo de niveles jerárquicos y habilidades administrativas (Robert L. Katz / Idalberto Chiavenato), ¿qué habilidades predominan en el Nivel Institucional (alta dirección) y en el Nivel Operativo, respectivamente? (Marque la respuesta correcta)",
+        opciones: [
+          "Habilidades conceptuales y de diseño en el nivel institucional; habilidades técnicas en el nivel operativo",
+          "Habilidades técnicas en el nivel institucional; habilidades conceptuales en el nivel operativo",
+          "Habilidades exclusivamente manuales en ambos niveles",
+          "Habilidades contables en el nivel institucional; habilidades de diseño en el nivel operativo",
+          "Habilidades humanas únicamente en el nivel operativo"
+        ],
+        correctas: [0]
+      },
+      {
+        id: 10,
+        nivel: "Intermedio",
+        bloom: "Comprender",
+        texto: "Dentro de los 14 principios de la administración de Henri Fayol, ¿qué establece el principio de 'Unidad de mando'? (Marque la respuesta correcta)",
+        opciones: [
+          "Cada empleado debe recibir órdenes de un solo superior",
+          "Las operaciones con un mismo objetivo deben tener múltiples gerentes",
+          "La autoridad debe concentrarse totalmente en el nivel operativo",
+          "Los intereses individuales prevalecen sobre los de la empresa",
+          "La rotación frecuente del personal mejora la adaptación"
+        ],
+        correctas: [0]
+      },
+      {
+        id: 11,
+        nivel: "Intermedio",
+        bloom: "Comprender",
+        texto: "En la etapa de definición de mercado del plan de marketing, ¿qué diferencia al mercado potencial del mercado objetivo? (Marque las alternativas correctas)",
+        opciones: [
+          "El mercado potencial está conformado por posibles clientes que desean el producto y cuentan con condiciones económicas para adquirirlo",
+          "El mercado objetivo es la parte del mercado potencial que la empresa selecciona de forma específica para dirigir su producto o servicio",
+          "El mercado objetivo siempre abarca al 100 % de la población sin necesidad de segmentación",
+          "El mercado potencial excluye a quienes tienen capacidad económica de compra",
+          "Ambos conceptos se refieren exclusivamente a los proveedores de insumos"
+        ],
+        correctas: [0, 1]
+      },
+      {
+        id: 12,
+        nivel: "Intermedio",
+        bloom: "Comprender",
+        texto: "Según Kotler y Singh, ¿cuáles son las cuatro estrategias competitivas de marketing frente a la competencia (que no deben confundirse con las estrategias genéricas de Porter)? (Marque las alternativas correctas)",
+        opciones: [
+          "Líder de mercado y Retador",
+          "Seguidor y Nicho",
+          "Liderazgo en costos y Diferenciación",
+          "Penetración y Diversificación",
+          "Preventivo y Correctivo"
+        ],
+        correctas: [0, 1]
+      },
+      {
+        id: 13,
+        nivel: "Intermedio",
+        bloom: "Comprender",
+        texto: "Respecto a los niveles del producto (Kotler) y su ciclo de vida, ¿qué enunciados son verdaderos? (Marque las alternativas correctas)",
+        opciones: [
+          "El producto aumentado incluye factores extra que diferencian al producto de la competencia",
+          "En la etapa de madurez el mercado está consolidado y el objetivo principal es la rentabilidad",
+          "En la etapa de introducción las ventas son máximas y existe alta rentabilidad inmediata",
+          "El producto esperado representa únicamente las mejoras tecnológicas futuras aún no inventadas",
+          "En la etapa de declive se elimina cualquier necesidad de reinventar el producto"
+        ],
+        correctas: [0, 1]
+      },
+      {
+        id: 14,
+        nivel: "Intermedio",
+        bloom: "Comprender",
+        texto: "En el diseño de procesos del plan de operaciones, ¿cómo se denominan los procesos que permiten generar el producto o servicio que se entrega directamente al cliente externo? (Marque la respuesta correcta)",
+        opciones: [
+          "Procesos operativos",
+          "Procesos de soporte",
+          "Procesos estratégicos",
+          "Procesos periféricos",
+          "Procesos de descreme"
+        ],
+        correctas: [0]
+      },
+      {
+        id: 15,
+        nivel: "Intermedio",
+        bloom: "Comprender",
+        texto: "En el seguimiento del proceso de producción, ¿qué enfoque se orienta alrededor de los productos para facilitar una producción de alto volumen y poca variedad (como ocurre en una panadería)? (Marque la respuesta correcta)",
+        opciones: [
+          "Enfoque en el producto",
+          "Enfoque en el proceso",
+          "Enfoque de personalización masiva",
+          "Enfoque de evitación",
+          "Enfoque divisional"
+        ],
+        correctas: [0]
+      },
+      {
+        id: 16,
+        nivel: "Intermedio",
+        bloom: "Comprender",
+        texto: "Sobre las herramientas de eficiencia operativa, ¿qué afirmaciones describen correctamente al Benchmarking y al Outsourcing? (Marque las alternativas correctas)",
+        opciones: [
+          "El benchmarking es un proceso sistemático para buscar, identificar e introducir mejores prácticas comparando cómo se alcanzan los resultados",
+          "El outsourcing permite concentrarse en el core business y encargar a terceros procesos importantes pero no inherentes a la actividad principal",
+          "El benchmarking consiste únicamente en copiar los precios más bajos de la competencia sin analizar procesos",
+          "El outsourcing exige delegar el núcleo central del negocio y eliminar todo control de calidad",
+          "El benchmarking consta de 12 pasos centrados únicamente en publicidad televisiva"
+        ],
+        correctas: [0, 1]
+      },
+
+      // ================= NIVEL AVANZADO (Preguntas 17 a 20) =================
+      {
+        id: 17,
+        nivel: "Avanzado",
+        bloom: "Analizar",
+        texto: "Una empresa agroindustrial que actualmente vende fideos en el mercado nacional decide lanzar una nueva línea de snacks saludables dirigida a nuevos mercados internacionales. Según la Matriz de Ansoff, ¿qué estrategia de crecimiento está aplicando y qué implicancia conlleva? (Marque las alternativas correctas)",
+        opciones: [
+          "Estrategia de diversificación (productos nuevos en mercados nuevos)",
+          "Representa la alternativa de mayor riesgo dentro de la Matriz de Ansoff",
+          "Requiere investigar previamente, construir capacidades y asegurar recursos para no quebrar el negocio",
+          "Estrategia de penetración de mercados (productos actuales en mercados actuales)",
+          "Estrategia de desarrollo de nuevos mercados con el mismo producto sin cambios"
+        ],
+        correctas: [0, 1, 2]
+      },
+      {
+        id: 18,
+        nivel: "Avanzado",
+        bloom: "Analizar",
+        texto: "Al analizar los factores coyunturales que afectan la estructura organizacional, ¿qué relaciones son correctas? (Marque las alternativas correctas)",
+        opciones: [
+          "Mientras más dinámico es el entorno externo, más orgánica debe ser la estructura",
+          "Mientras más complejo es el entorno externo, más descentralizada tiende a ser la estructura",
+          "A mayor tamaño y antigüedad de la empresa, menor formalización tienen sus procesos",
+          "La adhocracia se caracteriza por ser rígida, rutinaria y altamente burocrática",
+          "La diversificación de mercados elimina la necesidad de crear divisiones"
+        ],
+        correctas: [0, 1]
+      },
+      {
+        id: 19,
+        nivel: "Avanzado",
+        bloom: "Analizar",
+        texto: "Al integrar decisiones avanzadas de marketing competitivo, fijación de precios y servicios, ¿qué afirmaciones son correctas? (Marque las alternativas correctas)",
+        opciones: [
+          "La estrategia de precio de descreme busca maximizar utilidades ingresando al mercado con un precio alto para diferenciar el producto",
+          "Dentro de la estrategia de retador de mercado, el ataque de guerrilla es usado por compañías pequeñas que aprovechan su flexibilidad para actuar rápido en un nicho",
+          "En la variable Proactividad (7P), la evidencia física incluye el ambiente, decoración y uniformes, mientras la evidencia periférica confirma el servicio (ej. boleto o pasaje)",
+          "En contabilidad y marketing, el 'Precio' y el 'Precio de venta' (que incluye IGV) significan exactamente lo mismo",
+          "La distribución intensiva consiste en colocar el producto en una sola tienda exclusiva por país"
+        ],
+        correctas: [0, 1, 2]
+      },
+      {
+        id: 20,
+        nivel: "Avanzado",
+        bloom: "Analizar",
+        texto: "En la gestión avanzada del plan de operaciones, ¿qué principios y criterios corresponden al Mantenimiento Productivo Total (TPM) y a la ubicación de instalaciones? (Marque las alternativas correctas)",
+        opciones: [
+          "El TPM involucra a todos los trabajadores en labores básicas de mantenimiento y promueve formarlos para que manejen y mantengan sus propias máquinas",
+          "Entre los métodos utilizados para decidir la ubicación de instalaciones se encuentran el método de los factores ponderados, el centro de gravedad y el método del transporte",
+          "En empresas de servicios de consumo directo, la cercanía al consumidor potencial es irrelevante para los ingresos",
+          "El TPM prohíbe desarrollar planes de mantenimiento preventivo para reducir costos",
+          "El mantenimiento correctivo se aplica de forma rutinaria antes de que ocurra cualquier falla"
+        ],
+        correctas: [0, 1]
+      }
     ];
 
-    // =========================================================================
-    // 3. LÓGICA DE ALEATORIZACIÓN (PREGUNTAS Y ALTERNATIVAS) Y EVALUACIÓN
-    // =========================================================================
     let quizActivo = false;
-    let maxIntentosConfig = 2;
+    let maxIntentos = 2;
     let tiemposConfig = { basico: 10, intermedio: 15, avanzado: 20 };
-
     let intentoActual = 1;
     let preguntasExamen = [];
-    let ultimoOrdenIds = [];
     let idx = 0;
     let aciertos = 0;
     let tiempoTotal = 0;
     let seleccion = new Set();
     let timerInt = null;
     let tiempoRestante = 0;
-    let tiempoPreguntaActual = 10;
-    let bloqueado = false;
+    let respondida = false;
 
-    // Algoritmo Fisher-Yates para mezclar arreglos de forma uniforme
-    function barajar(lista) {
-      const copia = [...lista];
+    // Escudo anti-copia / anti-captura
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('copy', e => e.preventDefault());
+    document.addEventListener('cut', e => e.preventDefault());
+    document.addEventListener('keydown', e => {
+      if (
+        e.key === 'PrintScreen' ||
+        e.key === 'F12' ||
+        (e.ctrlKey && ['c', 'u', 's', 'p', 'a'].includes(e.key.toLowerCase())) ||
+        (e.ctrlKey && e.shiftKey && ['i', 'j', 'c', 's'].includes(e.key.toLowerCase()))
+      ) {
+        e.preventDefault();
+        if (!document.getElementById('viewQuiz').classList.contains('hidden')) {
+          document.getElementById('shieldOverlay').classList.remove('hidden');
+        }
+      }
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && !document.getElementById('viewQuiz').classList.contains('hidden')) {
+        document.getElementById('shieldOverlay').classList.remove('hidden');
+      }
+    });
+
+    function mezclarArray(arr) {
+      const copia = [...arr];
       for (let i = copia.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [copia[i], copia[j]] = [copia[j], copia[i]];
@@ -310,61 +433,43 @@
       return copia;
     }
 
-    // Mezcla las preguntas Y las alternativas recalculando los índices correctos
-    function prepararPreguntasAleatorias(listaBase) {
-      let mezcladas = barajar(listaBase);
-
-      // Si es el 2.° intento, evita repetir la misma secuencia que el 1.°
-      if (ultimoOrdenIds.length > 1 && mezcladas.map(q => q.id).join(",") === ultimoOrdenIds.join(",")) {
-        mezcladas = barajar(listaBase);
-      }
-      ultimoOrdenIds = mezcladas.map(q => q.id);
-
-      return mezcladas.map(p => {
-        const opcionesMarcadas = p.opciones.map((textoOp, idxOrig) => ({
-          texto: textoOp,
-          esCorrecta: p.correctas.includes(idxOrig)
+    function barajarPreguntasYOpciones() {
+      const mezcladas = mezclarArray(PREGUNTAS);
+      return mezcladas.map(q => {
+        const opcionesIndexadas = q.opciones.map((texto, idxOrig) => ({
+          texto,
+          esCorrecta: q.correctas.includes(idxOrig)
         }));
-
-        const opcionesBarajadas = barajar(opcionesMarcadas);
+        const opcionesBarajadas = mezclarArray(opcionesIndexadas);
         const nuevasCorrectas = [];
         opcionesBarajadas.forEach((op, nuevoIdx) => {
           if (op.esCorrecta) nuevasCorrectas.push(nuevoIdx);
         });
-
         return {
-          ...p,
-          opciones: opcionesBarajadas.map(op => op.texto),
+          ...q,
+          opciones: opcionesBarajadas.map(o => o.texto),
           correctas: nuevasCorrectas
         };
       });
     }
 
-    function formatearTiempo(seg) {
-      if (seg < 60) return `${seg}s`;
-      const m = Math.floor(seg / 60);
-      const s = seg % 60;
-      return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-    }
-
-    function obtenerTiempoPregunta(p) {
-      const niv = String(p.nivel || "").toLowerCase();
-      if (niv.includes("básic") || niv.includes("basic") || niv.includes("fácil") || niv.includes("facil")) {
-        return Number(tiemposConfig.basico) || p.tiempo || 10;
-      }
-      if (niv.includes("intermed") || niv.includes("medi")) {
-        return Number(tiemposConfig.intermedio) || p.tiempo || 15;
-      }
-      return Number(tiemposConfig.avanzado) || p.tiempo || 20;
+    function obtenerTiempoPregunta(nivel) {
+      const n = String(nivel || '').toLowerCase();
+      if (n.includes('bás') || n.includes('bas')) return Number(tiemposConfig.basico) || 10;
+      if (n.includes('ava')) return Number(tiemposConfig.avanzado) || 20;
+      return Number(tiemposConfig.intermedio) || 15;
     }
 
     async function checkStatus() {
+      if (!SCRIPT_URL || SCRIPT_URL.includes("PEGA_AQUI")) {
+        document.getElementById('statusText').textContent = 'Falta URL /exec';
+        return;
+      }
       try {
         const res = await fetch(`${SCRIPT_URL}?action=status&t=${Date.now()}`);
         const data = await res.json();
         quizActivo = Boolean(data.activo);
-
-        if (data.intentos) maxIntentosConfig = Math.min(2, Math.max(1, Number(data.intentos)));
+        if (data.intentos) maxIntentos = Number(data.intentos);
         if (data.tiempos) {
           tiemposConfig = {
             basico: Number(data.tiempos.basico) || 10,
@@ -372,255 +477,235 @@
             avanzado: Number(data.tiempos.avanzado) || 20
           };
         }
+        document.getElementById('lblMaxIntentos').textContent = maxIntentos;
+        document.getElementById('lblTB').textContent = tiemposConfig.basico;
+        document.getElementById('lblTI').textContent = tiemposConfig.intermedio;
+        document.getElementById('lblTA').textContent = tiemposConfig.avanzado;
 
-        document.getElementById("infoIntentos").textContent =
-          maxIntentosConfig === 1 ? "1 intento único" : "2 intentos (preguntas y alternativas aleatorias)";
-        document.getElementById("infoTiempos").textContent =
-          `Fácil: ${formatearTiempo(tiemposConfig.basico)} | Media: ${formatearTiempo(tiemposConfig.intermedio)} | Difícil: ${formatearTiempo(tiemposConfig.avanzado)}`;
-
-        const badge = document.getElementById("statusBadge");
-        const txt = document.getElementById("statusText");
-        const btn = document.getElementById("btnIniciar");
+        const badge = document.getElementById('statusBadge');
+        const txt = document.getElementById('statusText');
+        const btn = document.getElementById('btnIniciar');
 
         if (quizActivo) {
-          badge.className = "badge online";
-          txt.textContent = "Conectado";
-          if (!document.getElementById("viewLogin").classList.contains("hidden")) {
+          badge.className = 'badge online';
+          txt.textContent = 'Conectado';
+          if (btn.textContent !== 'Verificando ingreso...') {
             btn.disabled = false;
-            btn.textContent = "Iniciar Evaluación";
+            btn.textContent = 'Iniciar Evaluación';
           }
         } else {
-          badge.className = "badge offline";
-          txt.textContent = "Desconectado";
+          badge.className = 'badge offline';
+          txt.textContent = 'Desconectado';
           btn.disabled = true;
-          btn.textContent = "Quiz desactivado por el docente";
-        }
-
-        if (!document.getElementById("viewEnd").classList.contains("hidden") && data.promedioNotaMax) {
-          document.getElementById("avgMaxDisplay").textContent = data.promedioNotaMax;
+          btn.textContent = 'Esperando activación del docente...';
         }
       } catch (e) {
-        document.getElementById("statusText").textContent = "Sin conexión";
+        document.getElementById('statusBadge').className = 'badge offline';
+        document.getElementById('statusText').textContent = 'Sin conexión';
       }
     }
+
     setInterval(checkStatus, 4000);
     checkStatus();
 
-    async function iniciarQuiz(desdePantallaFinal = false) {
-      const dni = document.getElementById("dni").value.trim();
-      const nombre = document.getElementById("nombre").value.trim();
-      const msgEl = document.getElementById("loginMsg");
-      msgEl.textContent = "";
+    async function iniciarQuiz() {
+      const dni = document.getElementById('dni').value.trim();
+      const nombre = document.getElementById('nombre').value.trim();
+      const msgEl = document.getElementById('loginMsg');
+      msgEl.textContent = '';
 
       if (!dni || !nombre) {
-        msgEl.textContent = "Completa tu DNI/Código y tus Nombres completos.";
+        msgEl.textContent = 'Por favor, completa tu Código/DNI y tus Nombres y Apellidos.';
         return;
       }
 
-      if (!Array.isArray(PREGUNTAS) || PREGUNTAS.length === 0) {
-        msgEl.textContent = "Error: No se encontró el banco de preguntas.";
-        return;
-      }
-
-      const btnLogin = document.getElementById("btnIniciar");
-      const btnRetry = document.getElementById("btnSegundoIntento");
-      if (desdePantallaFinal) {
-        btnRetry.disabled = true;
-        btnRetry.textContent = "Preparando 2.° intento...";
-      } else {
-        btnLogin.disabled = true;
-        btnLogin.textContent = "Ingresando...";
-      }
+      const btn = document.getElementById('btnIniciar');
+      btn.disabled = true;
+      btn.textContent = 'Verificando ingreso...';
 
       try {
         const url = `${SCRIPT_URL}?action=start&dni=${encodeURIComponent(dni)}&nombre=${encodeURIComponent(nombre)}&t=${Date.now()}`;
         const resp = await fetch(url).then(r => r.json());
 
         if (!resp.ok) {
-          if (desdePantallaFinal) {
-            btnRetry.classList.add("hidden");
-            document.getElementById("endFinalNotice").textContent = resp.msg;
-          } else {
-            msgEl.textContent = resp.msg;
-            btnLogin.disabled = false;
-            btnLogin.textContent = "Iniciar Evaluación";
-          }
+          msgEl.textContent = resp.msg || 'No se pudo iniciar la evaluación.';
+          btn.disabled = false;
+          btn.textContent = 'Iniciar Evaluación';
           return;
         }
 
         intentoActual = Number(resp.intento) || 1;
-        if (resp.maxIntentos) maxIntentosConfig = Math.min(2, Number(resp.maxIntentos));
+        if (resp.maxIntentos) maxIntentos = Number(resp.maxIntentos);
         if (resp.tiempos) tiemposConfig = resp.tiempos;
 
-        // Genera nuevo orden aleatorio de preguntas y alternativas para este intento
-        preguntasExamen = prepararPreguntasAleatorias(PREGUNTAS);
+        preguntasExamen = barajarPreguntasYOpciones();
         idx = 0;
         aciertos = 0;
         tiempoTotal = 0;
 
-        document.getElementById("viewLogin").classList.add("hidden");
-        document.getElementById("viewEnd").classList.add("hidden");
-        document.getElementById("viewQuiz").classList.remove("hidden");
+        document.getElementById('viewLogin').classList.add('hidden');
+        document.getElementById('viewEnd').classList.add('hidden');
+        document.getElementById('viewQuiz').classList.remove('hidden');
         mostrarPregunta();
       } catch (e) {
-        msgEl.textContent = "Error de red al iniciar. Intenta nuevamente.";
-        btnLogin.disabled = false;
-        btnLogin.textContent = "Iniciar Evaluación";
-        btnRetry.disabled = false;
-        btnRetry.textContent = "Iniciar 2.° Intento (Preguntas y alternativas mezcladas) →";
+        msgEl.textContent = 'Error de red al conectar con el servidor. Intenta nuevamente.';
+        btn.disabled = false;
+        btn.textContent = 'Iniciar Evaluación';
       }
     }
 
+    function iniciarSegundoIntento() {
+      document.getElementById('btnSegundoIntento').classList.add('hidden');
+      iniciarQuiz();
+    }
+
     function mostrarPregunta() {
-      bloqueado = false;
       const p = preguntasExamen[idx];
       seleccion.clear();
+      respondida = false;
 
-      const btnConf = document.getElementById("btnConfirmar");
-      btnConf.disabled = false;
-      btnConf.textContent = idx === preguntasExamen.length - 1 ? "Finalizar Evaluación" : "Confirmar y Siguiente";
+      document.getElementById('qFeedback').classList.add('hidden');
+      document.getElementById('btnConfirmar').classList.remove('hidden');
+      const btnSig = document.getElementById('btnSiguiente');
+      btnSig.classList.add('hidden');
+      btnSig.disabled = false;
+      btnSig.textContent = (idx + 1 < preguntasExamen.length) ? 'Siguiente pregunta →' : 'Finalizar y ver mi nota';
 
-      document.getElementById("qMeta").textContent =
-        `Intento ${intentoActual} • Pregunta ${idx + 1}/${preguntasExamen.length} • ${p.nivel} (${p.correctas.length} resp.)`;
-      document.getElementById("qText").textContent = `${idx + 1}. ${p.texto}`;
+      document.getElementById('qMeta').textContent = `Intento ${intentoActual} • Pregunta ${idx + 1}/${preguntasExamen.length} • Nivel ${p.nivel}`;
+      document.getElementById('qText').textContent = p.texto;
 
-      const cont = document.getElementById("qOptions");
-      cont.innerHTML = "";
+      const cont = document.getElementById('qOptions');
+      cont.innerHTML = '';
       p.opciones.forEach((op, i) => {
-        const div = document.createElement("div");
-        div.className = "opt";
-        div.dataset.index = String(i);
-
-        const span = document.createElement("span");
-        span.className = "no-pointer-text";
-        span.textContent = `${String.fromCharCode(65 + i)}) ${op}`;
-        div.appendChild(span);
-
+        const div = document.createElement('div');
+        div.className = 'opt';
+        div.id = `opt_${i}`;
+        div.innerHTML = `<span>${String.fromCharCode(65 + i)}) ${op}</span><span class="opt-tag"></span>`;
         div.onclick = () => {
-          if (bloqueado) return;
-          if (seleccion.has(i)) {
-            seleccion.delete(i);
-            div.classList.remove("selected");
-          } else {
+          if (respondida) return;
+          if (p.correctas.length === 1) {
+            seleccion.clear();
+            cont.querySelectorAll('.opt').forEach(el => el.classList.remove('selected'));
             seleccion.add(i);
-            div.classList.add("selected");
+            div.classList.add('selected');
+          } else {
+            if (seleccion.has(i)) {
+              seleccion.delete(i);
+              div.classList.remove('selected');
+            } else {
+              seleccion.add(i);
+              div.classList.add('selected');
+            }
           }
         };
         cont.appendChild(div);
       });
 
-      tiempoPreguntaActual = obtenerTiempoPregunta(p);
-      tiempoRestante = tiempoPreguntaActual;
-      document.getElementById("qTimer").textContent = formatearTiempo(tiempoRestante);
+      const duracion = obtenerTiempoPregunta(p.nivel);
+      tiempoRestante = duracion;
+      document.getElementById('qTimer').textContent = tiempoRestante;
 
       clearInterval(timerInt);
       timerInt = setInterval(() => {
         tiempoRestante--;
-        document.getElementById("qTimer").textContent = formatearTiempo(Math.max(0, tiempoRestante));
-        if (tiempoRestante <= 0) confirmarYAvanzar();
+        document.getElementById('qTimer').textContent = Math.max(0, tiempoRestante);
+        if (tiempoRestante <= 0) {
+          verificarRespuesta(true);
+        }
       }, 1000);
     }
 
-    async function confirmarYAvanzar() {
-      if (bloqueado) return;
-      bloqueado = true;
+    function verificarRespuesta(porTiempo = false) {
+      if (respondida) return;
+      respondida = true;
       clearInterval(timerInt);
 
-      const btnConf = document.getElementById("btnConfirmar");
-      btnConf.disabled = true;
-
       const p = preguntasExamen[idx];
-      tiempoTotal += (tiempoPreguntaActual - Math.max(0, tiempoRestante));
+      const duracion = obtenerTiempoPregunta(p.nivel);
+      tiempoTotal += (duracion - Math.max(0, tiempoRestante));
 
-      const selArr = Array.from(seleccion).sort((a, b) => a - b).join(",");
-      const corArr = [...p.correctas].sort((a, b) => a - b).join(",");
-      if (selArr === corArr) aciertos++;
-
-      // Retroalimentación visual inmediata (verde/rojo) sobre las opciones mezcladas
-      const nodosOpt = document.querySelectorAll("#qOptions .opt");
-      nodosOpt.forEach(div => {
-        const i = Number(div.dataset.index);
-        if (p.correctas.includes(i)) {
-          div.classList.add("correct-fb");
-        } else if (seleccion.has(i)) {
-          div.classList.add("wrong-fb");
-        }
-      });
+      const correctSet = new Set(p.correctas);
+      const selArr = Array.from(seleccion).sort((a, b) => a - b).join(',');
+      const corArr = [...p.correctas].sort((a, b) => a - b).join(',');
+      const esCorrecta = (selArr === corArr);
+      if (esCorrecta) aciertos++;
 
       const totalPreguntas = preguntasExamen.length;
       const notaParcial = Number(((aciertos / totalPreguntas) * 20).toFixed(2));
-      const desaciertosTotales = totalPreguntas - aciertos;
-      const dni = document.getElementById("dni").value.trim();
+      const desaciertosActuales = totalPreguntas - aciertos;
+      const dni = document.getElementById('dni').value.trim();
 
-      // Reporte en vivo para actualizar el TOP 15 del Panel Docente
-      const progUrl = `${SCRIPT_URL}?action=progress&dni=${encodeURIComponent(dni)}&intento=${intentoActual}&nota=${notaParcial}&desaciertos=${desaciertosTotales}&tiempo=${tiempoTotal}&t=${Date.now()}`;
+      const progUrl = `${SCRIPT_URL}?action=progress&dni=${encodeURIComponent(dni)}&intento=${intentoActual}&nota=${notaParcial}&aciertos=${aciertos}&desaciertos=${desaciertosActuales}&tiempo=${tiempoTotal}&t=${Date.now()}`;
       fetch(progUrl, { keepalive: true }).catch(() => {});
 
-      await new Promise(r => setTimeout(r, 1100));
+      p.opciones.forEach((_, i) => {
+        const el = document.getElementById(`opt_${i}`);
+        el.classList.remove('selected');
+        el.style.cursor = 'default';
+        const tag = el.querySelector('.opt-tag');
 
+        if (correctSet.has(i)) {
+          el.classList.add('correct-box');
+          tag.textContent = seleccion.has(i) ? '✓ Correcta' : '✓ Era correcta';
+        } else if (seleccion.has(i)) {
+          el.classList.add('wrong-box');
+          tag.textContent = '✗ Incorrecta';
+        }
+      });
+
+      const letrasCorrectas = [...p.correctas]
+        .sort((a, b) => a - b)
+        .map(i => `${String.fromCharCode(65 + i)}) ${p.opciones[i]}`)
+        .join(' | ');
+
+      const fb = document.getElementById('qFeedback');
+      fb.classList.remove('hidden', 'fb-ok', 'fb-err');
+      if (esCorrecta) {
+        fb.classList.add('fb-ok');
+        fb.textContent = '¡Respuesta correcta!';
+      } else {
+        fb.classList.add('fb-err');
+        fb.innerHTML = `${porTiempo ? '⏱ Se agotó el tiempo.' : '✗ Respuesta incorrecta.'}<br>Alternativa(s) correcta(s): <strong>${letrasCorrectas}</strong>`;
+      }
+
+      document.getElementById('btnConfirmar').classList.add('hidden');
+      document.getElementById('btnSiguiente').classList.remove('hidden');
+    }
+
+    async function avanzarPregunta() {
       idx++;
-      if (idx < totalPreguntas) {
+      if (idx < preguntasExamen.length) {
         mostrarPregunta();
       } else {
+        const btnSig = document.getElementById('btnSiguiente');
+        btnSig.disabled = true;
+        btnSig.textContent = 'Guardando calificación...';
+
+        const totalPreguntas = preguntasExamen.length;
+        const notaNum = Number(((aciertos / totalPreguntas) * 20).toFixed(2));
+        const notaFormateada = notaNum.toFixed(2);
+        const desaciertosFinales = totalPreguntas - aciertos;
+        const dni = document.getElementById('dni').value.trim();
+
         try {
-          const finUrl = `${SCRIPT_URL}?action=finish&dni=${encodeURIComponent(dni)}&intento=${intentoActual}&nota=${notaParcial}&desaciertos=${desaciertosTotales}&tiempo=${tiempoTotal}&t=${Date.now()}`;
-          await fetch(finUrl);
+          const url = `${SCRIPT_URL}?action=finish&dni=${encodeURIComponent(dni)}&intento=${intentoActual}&nota=${notaNum}&aciertos=${aciertos}&desaciertos=${desaciertosFinales}&tiempo=${tiempoTotal}&t=${Date.now()}`;
+          await fetch(url);
         } catch (e) {}
 
-        document.getElementById("viewQuiz").classList.add("hidden");
-        document.getElementById("viewEnd").classList.remove("hidden");
-        document.getElementById("endStudentMsg").textContent =
-          `Intento ${intentoActual} de ${maxIntentosConfig} registrado correctamente.`;
-        document.getElementById("endNota").textContent = notaParcial.toFixed(2);
-        document.getElementById("endAciertos").textContent = `${aciertos}/${totalPreguntas}`;
-        document.getElementById("endDesaciertos").textContent = desaciertosTotales;
+        document.getElementById('viewQuiz').classList.add('hidden');
+        document.getElementById('viewEnd').classList.remove('hidden');
+        document.getElementById('endStudentMsg').textContent = `Intento ${intentoActual} registrado correctamente.`;
+        document.getElementById('finalNotaDecimal').textContent = notaFormateada;
+        document.getElementById('finalAciertosFrac').textContent = `${aciertos}/${totalPreguntas}`;
 
-        const btnRetry = document.getElementById("btnSegundoIntento");
-        const notice = document.getElementById("endFinalNotice");
-        if (intentoActual < maxIntentosConfig && quizActivo) {
-          btnRetry.classList.remove("hidden");
-          btnRetry.disabled = false;
-          btnRetry.textContent = "Iniciar 2.° Intento (Preguntas y alternativas mezcladas) →";
-          notice.textContent = "Si deseas mejorar tu calificación, puedes iniciar ahora mismo tu segundo intento con preguntas y alternativas reordenadas.";
+        const btn2 = document.getElementById('btnSegundoIntento');
+        if (intentoActual < maxIntentos && quizActivo) {
+          btn2.classList.remove('hidden');
         } else {
-          btnRetry.classList.add("hidden");
-          notice.textContent = "Has completado tus intentos disponibles para esta evaluación.";
+          btn2.classList.add('hidden');
         }
-
-        checkStatus();
       }
     }
-
-    // Protección contra cambio de pestaña y atajos de copia/captura durante el examen
-    function activarEscudo() {
-      if (!document.getElementById("viewQuiz").classList.contains("hidden")) {
-        document.getElementById("privacyShield").style.display = "flex";
-      }
-    }
-    function desactivarEscudo() {
-      document.getElementById("privacyShield").style.display = "none";
-    }
-
-    document.addEventListener("visibilitychange", () => {
-      if (document.hidden) activarEscudo();
-      else desactivarEscudo();
-    });
-    window.addEventListener("blur", activarEscudo);
-    window.addEventListener("focus", desactivarEscudo);
-
-    document.addEventListener("keydown", e => {
-      const quizVisible = !document.getElementById("viewQuiz").classList.contains("hidden");
-      if (!quizVisible) return;
-      if (
-        e.key === "PrintScreen" ||
-        e.key === "F12" ||
-        (e.ctrlKey && ["c", "x", "u", "s", "p", "a"].includes(e.key.toLowerCase()))
-      ) {
-        e.preventDefault();
-        activarEscudo();
-        setTimeout(desactivarEscudo, 1500);
-      }
-    });
   </script>
 </body>
 </html>
