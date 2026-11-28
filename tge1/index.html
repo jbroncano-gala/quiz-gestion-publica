@@ -5,13 +5,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Quiz – Taller de Generación de Empresas I</title>
   <style>
-    * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
-    input { user-select: text; -webkit-user-select: text; }
-    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f1f5f9; margin: 0; padding: 16px; color: #1e293b; }
-    .card { max-width: 720px; margin: 0 auto; background: #fff; border-radius: 14px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    * {
+      box-sizing: border-box;
+      -webkit-user-select: none !important;
+      -moz-user-select: none !important;
+      -ms-user-select: none !important;
+      user-select: none !important;
+      -webkit-touch-callout: none !important;
+    }
+    input {
+      -webkit-user-select: text !important;
+      -moz-user-select: text !important;
+      user-select: text !important;
+    }
+    @media print {
+      html, body { display: none !important; visibility: hidden !important; }
+    }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f1f5f9; margin: 0; padding: 16px; color: #1e293b; overflow-x: hidden; }
+    .card { position: relative; max-width: 720px; margin: 0 auto; background: #fff; border-radius: 14px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); transition: filter 0.08s ease; }
+    .card.blur-lock { filter: blur(24px) brightness(0.05) !important; pointer-events: none !important; }
+    .watermark-layer {
+      position: fixed; inset: 0; pointer-events: none; z-index: 50;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: 800; color: rgba(15, 23, 42, 0.055);
+      transform: rotate(-24deg); text-align: center; white-space: pre-wrap;
+    }
     .status-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 10px; flex-wrap: wrap; }
-    .badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; font-weight: 700; font-size: 13px; white-space: nowrap; }
-    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; font-weight: 700; font-size: 13px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
     .online { background: #dcfce7; color: #166534; } .online .dot { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
     .offline { background: #fee2e2; color: #991b1b; } .offline .dot { background: #ef4444; }
     input { width: 100%; padding: 12px; margin: 6px 0 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 16px; }
@@ -23,6 +44,7 @@
     .btn-secondary { background: #0f766e; margin-top: 14px; }
     .btn-secondary:hover:not(:disabled) { background: #115e59; }
     .info-box { background: #eff6ff; border-left: 4px solid #2563eb; padding: 12px 16px; border-radius: 8px; font-size: 14px; margin-bottom: 16px; line-height: 1.5; }
+    #qText, .opt span { pointer-events: none !important; }
     .opt { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; margin: 9px 0; border: 2px solid #e2e8f0; border-radius: 10px; cursor: pointer; transition: 0.15s; font-size: 15px; line-height: 1.4; font-weight: 500; }
     .opt:hover { border-color: #93c5fd; background: #f8fafc; }
     .opt.selected { border-color: #2563eb; background: #eff6ff; font-weight: 600; }
@@ -35,17 +57,21 @@
     .timer { font-size: 20px; font-weight: 800; color: #dc2626; background: #fef2f2; padding: 4px 12px; border-radius: 8px; border: 1px solid #fecaca; }
     .hidden { display: none !important; }
     .metric-box { background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 12px; padding: 24px; text-align: center; margin-top: 16px; }
-    .shield-warn { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.96); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; z-index: 9999; }
+    .shield-warn { position: fixed; inset: 0; background: #000000; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; z-index: 99999; }
   </style>
 </head>
-<body>
+<body oncontextmenu="return false;" ondragstart="return false;" onselectstart="return false;">
+  <div id="watermarkLayer" class="watermark-layer hidden"></div>
+
   <div id="shieldOverlay" class="shield-warn hidden">
-    <h2 style="color:#f87171;">⚠️ Protección de Evaluación Activa</h2>
-    <p style="max-width:460px;">Se detectó salida de pantalla o intento de captura/copia. Mantente dentro de la evaluación para continuar.</p>
-    <button onclick="document.getElementById('shieldOverlay').classList.add('hidden')" style="max-width:260px; margin-top:16px;">Volver al Examen</button>
+    <h2 style="color:#f87171; margin-bottom:8px;">🚫 Acción Bloqueada – Evaluación Protegida</h2>
+    <p id="shieldReason" style="max-width:480px; color:#e2e8f0; line-height:1.5;">
+      No está permitido realizar capturas de pantalla, copiar contenido, abrir herramientas de desarrollo ni abandonar la ventana del examen.
+    </p>
+    <button onclick="desactivarEscudo()" style="max-width:260px; margin-top:18px; background:#dc2626;">Regresar al Examen</button>
   </div>
 
-  <div class="card">
+  <div id="mainCard" class="card">
     <div class="status-bar">
       <strong>UNASAM – Taller de Generación de Empresas I</strong>
       <span id="statusBadge" class="badge offline"><span class="dot"></span><span id="statusText">Conectando...</span></span>
@@ -59,7 +85,7 @@
         • Ingresa tu <strong>Código de estudiante o DNI</strong> y tus <strong>Nombres y Apellidos completos</strong>.<br>
         • Dispones de hasta <strong><span id="lblMaxIntentos">2</span> intento(s)</strong> según lo configurado por el docente.<br>
         • Tiempos por nivel: <strong>Básico: <span id="lblTB">10</span> s</strong> | <strong>Intermedio: <span id="lblTI">15</span> s</strong> | <strong>Avanzado: <span id="lblTA">20</span> s</strong>.<br>
-        • Las preguntas y alternativas se presentan en <strong>orden aleatorio</strong> en cada intento.
+        • En cada intento se baraja el orden de las preguntas y sus alternativas. Está bloqueado copiar o capturar pantalla.
       </div>
       <label for="dni"><strong>Código de estudiante o DNI</strong></label>
       <input type="text" id="dni" placeholder="Ej. 20191234 o 45678912" autocomplete="off" />
@@ -82,7 +108,7 @@
       <button id="btnSiguiente" onclick="avanzarPregunta()" class="btn-next hidden" style="margin-top:16px;">Siguiente pregunta →</button>
     </div>
 
-    <!-- PANTALLA FINAL (NOTA DECIMAL 0.00 Y FORMATO 20/20) -->
+    <!-- PANTALLA FINAL -->
     <div id="viewEnd" class="hidden">
       <h2 style="text-align:center; margin-top:0; margin-bottom:6px; color:#166534;">¡Evaluación Finalizada!</h2>
       <p id="endStudentMsg" style="text-align:center; color:#475569; margin-top:0;"></p>
@@ -96,10 +122,10 @@
   </div>
 
   <script>
-    // PEGA AQUÍ LA URL /exec DE LA HOJA DE GOOGLE SHEETS DE TALLER DE GENERACIÓN DE EMPRESAS I
+    // PEGA AQUÍ LA URL DE IMPLEMENTACIÓN (/exec) DE GOOGLE APPS SCRIPT DE TGE1
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2I9gMFIf68Giw4rF9yMU5cCgTBA8X8dragxR47-cOm4WEZlkF8wWkYrLc_HdIVuQJ/exec";
 
-    // BANCO DE 20 PREGUNTAS AUTOCONTENIDO – TALLER DE GENERACIÓN DE EMPRESAS I
+    // BANCO DE 20 PREGUNTAS AUTOCONTENIDO – TALLER DE GENERACIÓN DE EMPRESAS I (TGE1)
     const PREGUNTAS = [
       // ================= NIVEL BÁSICO (Preguntas 1 a 6) =================
       {
@@ -393,6 +419,7 @@
     let tiemposConfig = { basico: 10, intermedio: 15, avanzado: 20 };
     let intentoActual = 1;
     let preguntasExamen = [];
+    let firmaOrdenAnterior = '';
     let idx = 0;
     let aciertos = 0;
     let tiempoTotal = 0;
@@ -401,28 +428,74 @@
     let tiempoRestante = 0;
     let respondida = false;
 
-    // Escudo anti-copia / anti-captura
-    document.addEventListener('contextmenu', e => e.preventDefault());
-    document.addEventListener('copy', e => e.preventDefault());
-    document.addEventListener('cut', e => e.preventDefault());
-    document.addEventListener('keydown', e => {
-      if (
-        e.key === 'PrintScreen' ||
-        e.key === 'F12' ||
-        (e.ctrlKey && ['c', 'u', 's', 'p', 'a'].includes(e.key.toLowerCase())) ||
-        (e.ctrlKey && e.shiftKey && ['i', 'j', 'c', 's'].includes(e.key.toLowerCase()))
-      ) {
-        e.preventDefault();
-        if (!document.getElementById('viewQuiz').classList.contains('hidden')) {
-          document.getElementById('shieldOverlay').classList.remove('hidden');
+    // ==================== ESCUDO ANTI-COPIA Y ANTI-CAPTURA ====================
+    function enEvaluacionActiva() {
+      return !document.getElementById('viewQuiz').classList.contains('hidden');
+    }
+
+    function limpiarPortapapeles() {
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText('Captura bloqueada - Evaluación protegida').catch(() => {});
         }
+      } catch (err) {}
+    }
+
+    function activarEscudo(motivo = 'No está permitido realizar capturas de pantalla, copiar contenido, abrir herramientas de desarrollo ni abandonar la ventana del examen.') {
+      limpiarPortapapeles();
+      document.getElementById('mainCard').classList.add('blur-lock');
+      document.getElementById('shieldReason').textContent = motivo;
+      document.getElementById('shieldOverlay').classList.remove('hidden');
+    }
+
+    function desactivarEscudo() {
+      document.getElementById('shieldOverlay').classList.add('hidden');
+      document.getElementById('mainCard').classList.remove('blur-lock');
+    }
+
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('copy', e => {
+      e.preventDefault();
+      limpiarPortapapeles();
+      activarEscudo('El comando de copiar (Ctrl+C) está deshabilitado en esta evaluación.');
+    });
+    document.addEventListener('cut', e => {
+      e.preventDefault();
+      limpiarPortapapeles();
+    });
+    document.addEventListener('selectstart', e => {
+      if (e.target && e.target.tagName !== 'INPUT') e.preventDefault();
+    });
+
+    function manejarTeclasBloqueadas(e) {
+      const k = (e.key || '').toLowerCase();
+      const esPrintScreen = (e.key === 'PrintScreen' || e.code === 'PrintScreen' || e.keyCode === 44);
+      const esTeclaSistema = (e.key === 'Meta' || k === 'os' || e.metaKey);
+      const esAtajoCopia = (e.ctrlKey || e.metaKey) && ['c', 'x', 'u', 's', 'p', 'a'].includes(k);
+      const esDevTools = (e.key === 'F12' || e.keyCode === 123 || ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i', 'j', 'c', 's', '3', '4', '5'].includes(k)));
+
+      if (esPrintScreen || esAtajoCopia || esDevTools || (esTeclaSistema && enEvaluacionActiva())) {
+        e.preventDefault();
+        e.stopPropagation();
+        activarEscudo('Se bloqueó un intento de captura de pantalla, copiado o atajo no permitido.');
+      }
+    }
+
+    window.addEventListener('keydown', manejarTeclasBloqueadas, true);
+    window.addEventListener('keyup', manejarTeclasBloqueadas, true);
+
+    window.addEventListener('blur', () => {
+      if (enEvaluacionActiva()) {
+        activarEscudo('Se detectó pérdida de foco o herramienta de recorte/captura externa.');
       }
     });
+
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden && !document.getElementById('viewQuiz').classList.contains('hidden')) {
-        document.getElementById('shieldOverlay').classList.remove('hidden');
+      if (document.hidden && enEvaluacionActiva()) {
+        activarEscudo('Se detectó cambio de pestaña o minimización durante el examen.');
       }
     });
+    // ========================================================================
 
     function mezclarArray(arr) {
       const copia = [...arr];
@@ -434,13 +507,27 @@
     }
 
     function barajarPreguntasYOpciones() {
-      const mezcladas = mezclarArray(PREGUNTAS);
+      let mezcladas = mezclarArray(PREGUNTAS);
+      let firma = mezcladas.map(q => q.id).join('-');
+      let intentosBarajado = 0;
+
+      // Garantiza que en un 2.° intento el orden de las preguntas sea distinto al del intento anterior
+      while (firmaOrdenAnterior && firma === firmaOrdenAnterior && intentosBarajado < 10) {
+        mezcladas = mezclarArray(PREGUNTAS);
+        firma = mezcladas.map(q => q.id).join('-');
+        intentosBarajado++;
+      }
+      firmaOrdenAnterior = firma;
+
       return mezcladas.map(q => {
         const opcionesIndexadas = q.opciones.map((texto, idxOrig) => ({
           texto,
           esCorrecta: q.correctas.includes(idxOrig)
         }));
-        const opcionesBarajadas = mezclarArray(opcionesIndexadas);
+        let opcionesBarajadas = mezclarArray(opcionesIndexadas);
+        if (opcionesBarajadas.map(o => o.texto).join('|') === q.opciones.join('|')) {
+          opcionesBarajadas = mezclarArray(opcionesIndexadas);
+        }
         const nuevasCorrectas = [];
         opcionesBarajadas.forEach((op, nuevoIdx) => {
           if (op.esCorrecta) nuevasCorrectas.push(nuevoIdx);
@@ -461,13 +548,30 @@
     }
 
     async function checkStatus() {
-      if (!SCRIPT_URL || SCRIPT_URL.includes("PEGA_AQUI")) {
-        document.getElementById('statusText').textContent = 'Falta URL /exec';
+      const urlLimpia = (SCRIPT_URL || '').trim();
+      const badge = document.getElementById('statusBadge');
+      const txt = document.getElementById('statusText');
+      const btn = document.getElementById('btnIniciar');
+
+      if (!urlLimpia || urlLimpia.includes("PEGA_AQUI")) {
+        badge.className = 'badge offline';
+        txt.textContent = 'Falta pegar URL /exec en tge1/index.html';
         return;
       }
+      if (urlLimpia.includes("docs.google.com/spreadsheets")) {
+        badge.className = 'badge offline';
+        txt.textContent = 'Error: Pegaste el link de Sheets; debes pegar el /exec de Apps Script';
+        return;
+      }
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+
       try {
-        const res = await fetch(`${SCRIPT_URL}?action=status&t=${Date.now()}`);
+        const res = await fetch(`${urlLimpia}?action=status&t=${Date.now()}`, { signal: controller.signal });
+        clearTimeout(timeoutId);
         const data = await res.json();
+
         quizActivo = Boolean(data.activo);
         if (data.intentos) maxIntentos = Number(data.intentos);
         if (data.tiempos) {
@@ -482,10 +586,6 @@
         document.getElementById('lblTI').textContent = tiemposConfig.intermedio;
         document.getElementById('lblTA').textContent = tiemposConfig.avanzado;
 
-        const badge = document.getElementById('statusBadge');
-        const txt = document.getElementById('statusText');
-        const btn = document.getElementById('btnIniciar');
-
         if (quizActivo) {
           badge.className = 'badge online';
           txt.textContent = 'Conectado';
@@ -495,13 +595,16 @@
           }
         } else {
           badge.className = 'badge offline';
-          txt.textContent = 'Desconectado';
+          txt.textContent = 'Desconectado (Actívalo en Panel Docente)';
           btn.disabled = true;
           btn.textContent = 'Esperando activación del docente...';
         }
       } catch (e) {
-        document.getElementById('statusBadge').className = 'badge offline';
-        document.getElementById('statusText').textContent = 'Sin conexión';
+        clearTimeout(timeoutId);
+        badge.className = 'badge offline';
+        txt.textContent = e.name === 'AbortError'
+          ? 'Tiempo agotado: revisa permisos de Apps Script (Cualquier persona)'
+          : 'Sin conexión: verifica que la URL /exec sea pública';
       }
     }
 
@@ -524,7 +627,7 @@
       btn.textContent = 'Verificando ingreso...';
 
       try {
-        const url = `${SCRIPT_URL}?action=start&dni=${encodeURIComponent(dni)}&nombre=${encodeURIComponent(nombre)}&t=${Date.now()}`;
+        const url = `${SCRIPT_URL.trim()}?action=start&dni=${encodeURIComponent(dni)}&nombre=${encodeURIComponent(nombre)}&t=${Date.now()}`;
         const resp = await fetch(url).then(r => r.json());
 
         if (!resp.ok) {
@@ -543,12 +646,16 @@
         aciertos = 0;
         tiempoTotal = 0;
 
+        const wm = document.getElementById('watermarkLayer');
+        wm.textContent = `${dni} • ${nombre.toUpperCase()}\n${dni} • ${nombre.toUpperCase()}`;
+        wm.classList.remove('hidden');
+
         document.getElementById('viewLogin').classList.add('hidden');
         document.getElementById('viewEnd').classList.add('hidden');
         document.getElementById('viewQuiz').classList.remove('hidden');
         mostrarPregunta();
       } catch (e) {
-        msgEl.textContent = 'Error de red al conectar con el servidor. Intenta nuevamente.';
+        msgEl.textContent = 'Error de conexión al iniciar. Intenta nuevamente.';
         btn.disabled = false;
         btn.textContent = 'Iniciar Evaluación';
       }
@@ -635,7 +742,7 @@
       const desaciertosActuales = totalPreguntas - aciertos;
       const dni = document.getElementById('dni').value.trim();
 
-      const progUrl = `${SCRIPT_URL}?action=progress&dni=${encodeURIComponent(dni)}&intento=${intentoActual}&nota=${notaParcial}&aciertos=${aciertos}&desaciertos=${desaciertosActuales}&tiempo=${tiempoTotal}&t=${Date.now()}`;
+      const progUrl = `${SCRIPT_URL.trim()}?action=progress&dni=${encodeURIComponent(dni)}&intento=${intentoActual}&nota=${notaParcial}&aciertos=${aciertos}&desaciertos=${desaciertosActuales}&tiempo=${tiempoTotal}&t=${Date.now()}`;
       fetch(progUrl, { keepalive: true }).catch(() => {});
 
       p.opciones.forEach((_, i) => {
@@ -688,10 +795,11 @@
         const dni = document.getElementById('dni').value.trim();
 
         try {
-          const url = `${SCRIPT_URL}?action=finish&dni=${encodeURIComponent(dni)}&intento=${intentoActual}&nota=${notaNum}&aciertos=${aciertos}&desaciertos=${desaciertosFinales}&tiempo=${tiempoTotal}&t=${Date.now()}`;
+          const url = `${SCRIPT_URL.trim()}?action=finish&dni=${encodeURIComponent(dni)}&intento=${intentoActual}&nota=${notaNum}&aciertos=${aciertos}&desaciertos=${desaciertosFinales}&tiempo=${tiempoTotal}&t=${Date.now()}`;
           await fetch(url);
         } catch (e) {}
 
+        document.getElementById('watermarkLayer').classList.add('hidden');
         document.getElementById('viewQuiz').classList.add('hidden');
         document.getElementById('viewEnd').classList.remove('hidden');
         document.getElementById('endStudentMsg').textContent = `Intento ${intentoActual} registrado correctamente.`;
